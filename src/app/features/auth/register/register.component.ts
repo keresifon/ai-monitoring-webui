@@ -47,7 +47,7 @@ export class RegisterComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(6)]], // NOSONAR: S2068 - Form field initialization, not a hard-coded password
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
   }

@@ -54,7 +54,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     // Initialize form
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]] // NOSONAR: S2068 - Form field initialization, not a hard-coded password
     });
 
     // Get return URL from route parameters or default to dashboard
