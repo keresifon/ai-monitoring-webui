@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
@@ -78,64 +78,77 @@ describe('AuthService', () => {
   });
 
   describe('Login', () => {
-    it('should login successfully', (done) => {
+    it('should login successfully', fakeAsync(() => {
       const credentials: LoginRequest = {
         username: 'testuser',
         password: 'password123'
       };
 
-      service.login(credentials).subscribe(response => {
-        expect(response).toEqual(mockLoginResponse);
-        expect(service.getCurrentUser()).toEqual(mockUser);
-        expect(service.getToken()).toBe('mock-token');
-        expect(service.isAuthenticated()).toBe(true);
-        done();
+      let response: any;
+      service.login(credentials).subscribe(res => {
+        response = res;
       });
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/login`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(credentials);
       req.flush(mockLoginResponse);
-    });
+      tick();
 
-    it('should handle login error', (done) => {
+      expect(response).toEqual(mockLoginResponse);
+      expect(service.getCurrentUser()).toEqual(mockUser);
+      expect(service.getToken()).toBe('mock-token');
+      expect(service.isAuthenticated()).toBe(true);
+    }));
+
+    it('should handle login error', fakeAsync(() => {
       const credentials: LoginRequest = {
         username: 'testuser',
         password: 'wrongpassword'
       };
 
+      let error: any;
       service.login(credentials).subscribe({
         next: () => fail('should have failed'),
-        error: (error) => {
-          expect(error).toBeTruthy();
-          expect(service.isAuthenticated()).toBe(false);
-          done();
+        error: (err) => {
+          error = err;
         }
       });
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/login`);
       req.flush({ message: 'Invalid credentials' }, { status: 401, statusText: 'Unauthorized' });
-    });
+      tick();
 
-    it('should set loading state during login', () => {
+      expect(error).toBeTruthy();
+      expect(service.isAuthenticated()).toBe(false);
+    }));
+
+    it('should set loading state during login', fakeAsync(() => {
       const credentials: LoginRequest = {
         username: 'testuser',
         password: 'password123'
       };
 
       let loadingStates: boolean[] = [];
-      service.loading$.subscribe(loading => loadingStates.push(loading));
+      const loadingSub = service.loading$.subscribe(loading => {
+        loadingStates.push(loading);
+      });
 
       service.login(credentials).subscribe();
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/login`);
       expect(loadingStates).toContain(true);
       req.flush(mockLoginResponse);
-    });
+      tick();
+      loadingSub.unsubscribe();
+    }));
   });
 
   describe('Register', () => {
-    it('should register successfully', (done) => {
+    it('should register successfully', fakeAsync(() => {
       const registerData: RegisterRequest = {
         username: 'newuser',
         email: 'new@example.com',
@@ -149,18 +162,22 @@ describe('AuthService', () => {
         user: mockUser
       };
 
-      service.register(registerData).subscribe(response => {
-        expect(response).toEqual(mockRegisterResponse);
-        done();
+      let response: any;
+      service.register(registerData).subscribe(res => {
+        response = res;
       });
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/register`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(registerData);
       req.flush(mockRegisterResponse);
-    });
+      tick();
 
-    it('should handle registration error', (done) => {
+      expect(response).toEqual(mockRegisterResponse);
+    }));
+
+    it('should handle registration error', fakeAsync(() => {
       const registerData: RegisterRequest = {
         username: 'existinguser',
         email: 'existing@example.com',
@@ -169,17 +186,21 @@ describe('AuthService', () => {
         lastName: 'User'
       };
 
+      let error: any;
       service.register(registerData).subscribe({
         next: () => fail('should have failed'),
-        error: (error) => {
-          expect(error).toBeTruthy();
-          done();
+        error: (err) => {
+          error = err;
         }
       });
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/register`);
       req.flush({ message: 'Username already exists' }, { status: 400, statusText: 'Bad Request' });
-    });
+      tick();
+
+      expect(error).toBeTruthy();
+    }));
   });
 
   describe('Logout', () => {
@@ -202,7 +223,7 @@ describe('AuthService', () => {
   });
 
   describe('Token Refresh', () => {
-    it('should refresh token successfully', (done) => {
+    it('should refresh token successfully', fakeAsync(() => {
       localStorage.setItem('refresh_token', 'old-refresh-token');
 
       const mockRefreshResponse = {
@@ -211,16 +232,20 @@ describe('AuthService', () => {
         expiresIn: 3600
       };
 
-      service.refreshToken().subscribe(response => {
-        expect(response).toEqual(mockRefreshResponse);
-        expect(service.getToken()).toBe('new-token');
-        done();
+      let response: any;
+      service.refreshToken().subscribe(res => {
+        response = res;
       });
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/refresh`);
       expect(req.request.method).toBe('POST');
       req.flush(mockRefreshResponse);
-    });
+      tick();
+
+      expect(response).toEqual(mockRefreshResponse);
+      expect(service.getToken()).toBe('new-token');
+    }));
 
     it('should logout if refresh token is missing', (done) => {
       spyOn(service, 'logout');
@@ -234,21 +259,26 @@ describe('AuthService', () => {
       });
     });
 
-    it('should logout on refresh token error', (done) => {
+    it('should logout on refresh token error', fakeAsync(() => {
       localStorage.setItem('refresh_token', 'invalid-refresh-token');
       spyOn(service, 'logout');
 
+      let errorOccurred = false;
       service.refreshToken().subscribe({
         next: () => fail('should have failed'),
         error: () => {
-          expect(service.logout).toHaveBeenCalled();
-          done();
+          errorOccurred = true;
         }
       });
 
+      tick();
       const req = httpMock.expectOne(`${environment.apiGateway}/api/v1/auth/refresh`);
       req.flush({ message: 'Invalid refresh token' }, { status: 401, statusText: 'Unauthorized' });
-    });
+      tick();
+
+      expect(errorOccurred).toBe(true);
+      expect(service.logout).toHaveBeenCalled();
+    }));
   });
 
   describe('Role Checks', () => {
