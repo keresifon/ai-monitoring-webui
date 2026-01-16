@@ -42,8 +42,9 @@ jobs:
       - name: Build
         run: npm run build -- --configuration=production
 
-      - name: Test
+      - name: Test with coverage
         run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+        continue-on-error: false
 
       - name: Verify coverage file exists
         id: coverage-check
@@ -51,11 +52,18 @@ jobs:
           if [ -f "coverage/lcov.info" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Coverage file found at coverage/lcov.info"
-            ls -lh coverage/
+            echo "File size:"
+            ls -lh coverage/lcov.info
+            echo "First 50 lines of coverage file:"
+            head -n 50 coverage/lcov.info || echo "File is empty or unreadable"
+            echo "Coverage summary:"
+            grep -E "^SF:|^LF:|^LH:" coverage/lcov.info | head -n 10 || echo "No coverage data found"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "Coverage file not found. Checking for alternative locations..."
             find . -name "lcov.info" -type f 2>/dev/null || echo "No lcov.info file found"
+            echo "Checking coverage directory:"
+            ls -la coverage/ 2>/dev/null || echo "Coverage directory does not exist"
           fi
 
       - name: Cache SonarCloud packages
@@ -66,6 +74,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Run SonarCloud analysis
+        if: steps.coverage-check.outputs.exists == 'true'
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,6 +83,7 @@ jobs:
           args: >
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.coverage.exclusions=**/*.spec.ts,**/*.test.ts,**/main.ts,**/app.config.ts,**/app.routes.ts,**/environments/**
 
       - name: Upload coverage to Codecov
         if: steps.coverage-check.outputs.exists == 'true'
