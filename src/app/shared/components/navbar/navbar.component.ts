@@ -40,13 +40,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   currentUser: User | null = null;
   notificationCount = 0;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private readonly REFRESH_INTERVAL = 30000; // 30 seconds
 
   constructor(
-    private authService: AuthService,
-    private alertService: AlertService,
-    private router: Router
+    private readonly authService: AuthService,
+    private readonly alertService: AlertService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {

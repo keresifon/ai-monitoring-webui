@@ -22,7 +22,7 @@ import {
 export class DashboardService {
   private readonly apiUrl = `${environment.apiUrl}/dashboard`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Get complete dashboard data

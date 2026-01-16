@@ -65,10 +65,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Auto-refresh
   private readonly REFRESH_INTERVAL = 30000; // 30 seconds
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private chartsInitialized = false;
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private readonly dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.startAutoRefresh();

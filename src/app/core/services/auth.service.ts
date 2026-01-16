@@ -29,7 +29,7 @@ export class AuthService {
   private readonly USER_KEY = 'user_data';
 
   // Auth state management
-  private authState$ = new BehaviorSubject<AuthState>({
+  private readonly authState$ = new BehaviorSubject<AuthState>({
     isAuthenticated: false,
     user: null,
     token: null,
@@ -56,8 +56,8 @@ export class AuthService {
   );
 
   constructor(
-    private http: HttpClient,
-    private router: Router
+    private readonly http: HttpClient,
+    private readonly router: Router
   ) {
     this.initializeAuthState();
   }
@@ -256,13 +256,9 @@ export class AuthService {
    * Handle authentication error
    */
   private handleAuthError(error: HttpErrorResponse): void {
-    let errorMessage = 'An error occurred during authentication';
-
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      errorMessage = error.error?.message || `Error Code: ${error.status}`;
-    }
+    const errorMessage = error.error instanceof ErrorEvent
+      ? `Error: ${error.error.message}`
+      : error.error?.message || `Error Code: ${error.status}`;
 
     this.authState$.next({
       ...this.authState$.value,

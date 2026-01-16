@@ -25,8 +25,8 @@ export class AppComponent implements OnInit {
   showNavigation = true;
 
   constructor(
-    private router: Router,
-    private authService: AuthService
+    private readonly router: Router,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {

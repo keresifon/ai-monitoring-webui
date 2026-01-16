@@ -134,7 +134,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   getErrorMessage(controlName: string): string {
     const control = this.loginForm.get(controlName);
     
-    if (!control || !control.errors || !control.touched) {
+    if (!control?.errors || !control.touched) {
       return '';
     }
 

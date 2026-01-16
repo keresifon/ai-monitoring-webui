@@ -5,9 +5,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { filter } from 'rxjs/operators';
 import { Subject, interval } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
@@ -42,7 +41,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   activeRoute = '';
   activeAlertsCount = 0;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private readonly REFRESH_INTERVAL = 30000; // 30 seconds
 
   navItems: NavItem[] = [
@@ -89,9 +88,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private router: Router,
-    private authService: AuthService,
-    private alertService: AlertService
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly alertService: AlertService
   ) {}
 
   ngOnInit(): void {

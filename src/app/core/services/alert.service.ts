@@ -24,7 +24,7 @@ import {
 export class AlertService {
   private readonly apiUrl = `${environment.apiUrl}/alerts`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Get all alerts with optional filtering

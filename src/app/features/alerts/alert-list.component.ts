@@ -69,12 +69,12 @@ export class AlertListComponent implements OnInit, OnDestroy {
   statusOptions = Object.values(AlertStatus);
   
   private readonly REFRESH_INTERVAL = 30000;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private alertService: AlertService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar
+    private readonly alertService: AlertService,
+    private readonly authService: AuthService,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {

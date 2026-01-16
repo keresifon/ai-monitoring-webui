@@ -19,7 +19,7 @@ export class LogService {
   private readonly apiUrl = `${environment.apiUrl}/logs`;
   private readonly cacheTime = 30000; // 30 seconds
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Search logs with filters

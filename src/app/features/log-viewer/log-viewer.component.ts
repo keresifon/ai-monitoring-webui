@@ -89,7 +89,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   errorMessage = '';
   
   // Real-time updates
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private refreshSubscription?: Subscription;
   private readonly REFRESH_INTERVAL = 30000; // 30 seconds
 
@@ -97,9 +97,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   readonly logLevelColors = LOG_LEVEL_COLORS;
 
   constructor(
-    private logService: LogService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private readonly logService: LogService,
+    private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -308,12 +308,12 @@ export class LogViewerComponent implements OnInit, OnDestroy {
    * Download file helper
    */
   private downloadFile(blob: Blob, filename: string): void {
-    const url = window.URL.createObjectURL(blob);
+    const url = globalThis.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
     link.click();
-    window.URL.revokeObjectURL(url);
+    globalThis.URL.revokeObjectURL(url);
   }
 
   /**
