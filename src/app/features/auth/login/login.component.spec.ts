@@ -32,7 +32,8 @@ describe('LoginComponent', () => {
   const mockLoginResponse: LoginResponse = {
     token: 'mock-token',
     refreshToken: 'mock-refresh-token',
-    user: mockUser
+    user: mockUser,
+    expiresIn: 3600
   };
 
   beforeEach(async () => {
@@ -219,7 +220,10 @@ describe('LoginComponent', () => {
 
   it('should subscribe to loading state', () => {
     const loadingSubject = new BehaviorSubject<boolean>(false);
-    authService.loading$ = loadingSubject.asObservable();
+    Object.defineProperty(authService, 'loading$', {
+      get: () => loadingSubject.asObservable(),
+      configurable: true
+    });
     
     fixture.detectChanges();
     
@@ -232,7 +236,10 @@ describe('LoginComponent', () => {
 
   it('should show error message from auth service', () => {
     const errorSubject = new BehaviorSubject<string | null>(null);
-    authService.error$ = errorSubject.asObservable();
+    Object.defineProperty(authService, 'error$', {
+      get: () => errorSubject.asObservable(),
+      configurable: true
+    });
     
     fixture.detectChanges();
     

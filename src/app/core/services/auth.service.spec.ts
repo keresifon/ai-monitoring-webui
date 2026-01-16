@@ -25,7 +25,8 @@ describe('AuthService', () => {
   const mockLoginResponse = {
     token: 'mock-token',
     refreshToken: 'mock-refresh-token',
-    user: mockUser
+    user: mockUser,
+    expiresIn: 3600
   };
 
   beforeEach(() => {
@@ -206,7 +207,8 @@ describe('AuthService', () => {
 
       const mockRefreshResponse = {
         token: 'new-token',
-        refreshToken: 'new-refresh-token'
+        refreshToken: 'new-refresh-token',
+        expiresIn: 3600
       };
 
       service.refreshToken().subscribe(response => {

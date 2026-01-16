@@ -63,11 +63,14 @@ describe('SidebarComponent', () => {
 
   it('should load active alerts count', () => {
     alertService.getStatistics.and.returnValue(of({
-      total: 5,
-      open: 3,
-      acknowledged: 1,
-      resolved: 1,
-      bySeverity: {}
+      totalAlerts: 5,
+      activeAlerts: 3,
+      acknowledgedAlerts: 1,
+      resolvedAlerts: 1,
+      criticalAlerts: 1,
+      highAlerts: 1,
+      mediumAlerts: 1,
+      lowAlerts: 2
     }));
 
     fixture.detectChanges();

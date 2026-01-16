@@ -3,7 +3,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { provideHttpClient } from '@angular/common/http';
 import { AlertService } from './alert.service';
 import { environment } from '../../../environments/environment';
-import { Alert, AlertFilter } from '../../shared/models/alert.model';
+import { Alert, AlertFilter, AlertSeverity, AlertStatus } from '../../shared/models/alert.model';
 
 describe('AlertService', () => {
   let service: AlertService;
@@ -12,14 +12,12 @@ describe('AlertService', () => {
   const mockAlert: Alert = {
     id: '1',
     ruleId: 'rule1',
-    severity: 'HIGH',
-    status: 'OPEN',
+    ruleName: 'Test Rule',
+    severity: AlertSeverity.HIGH,
+    status: AlertStatus.ACTIVE,
     title: 'Test Alert',
     message: 'Test message',
-    source: 'test-source',
-    timestamp: new Date(),
-    acknowledgedAt: null,
-    resolvedAt: null,
+    triggeredAt: new Date(),
     metadata: {}
   };
 
@@ -60,8 +58,8 @@ describe('AlertService', () => {
 
     it('should fetch alerts with filters', (done) => {
       const filter: AlertFilter = {
-        severity: ['HIGH', 'CRITICAL'],
-        status: ['OPEN'],
+        severity: [AlertSeverity.HIGH, AlertSeverity.CRITICAL],
+        status: [AlertStatus.ACTIVE],
         search: 'test'
       };
 
@@ -70,7 +68,7 @@ describe('AlertService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/alerts?severity=HIGH,CRITICAL&status=OPEN&search=test`);
+      const req = httpMock.expectOne(`${environment.apiUrl}/alerts?severity=HIGH,CRITICAL&status=ACTIVE&search=test`);
       expect(req.request.method).toBe('GET');
       req.flush([mockAlert]);
     });
@@ -105,11 +103,14 @@ describe('AlertService', () => {
   describe('getStatistics', () => {
     it('should fetch alert statistics', (done) => {
       const mockStats = {
-        total: 10,
-        open: 5,
-        acknowledged: 3,
-        resolved: 2,
-        bySeverity: { HIGH: 5, MEDIUM: 3, LOW: 2 }
+        totalAlerts: 10,
+        activeAlerts: 5,
+        acknowledgedAlerts: 3,
+        resolvedAlerts: 2,
+        criticalAlerts: 2,
+        highAlerts: 3,
+        mediumAlerts: 3,
+        lowAlerts: 2
       };
 
       service.getStatistics().subscribe(stats => {
@@ -125,10 +126,10 @@ describe('AlertService', () => {
 
   describe('acknowledgeAlert', () => {
     it('should acknowledge an alert', (done) => {
-      const acknowledgedAlert = { ...mockAlert, status: 'ACKNOWLEDGED' as const };
+      const acknowledgedAlert = { ...mockAlert, status: AlertStatus.ACKNOWLEDGED, acknowledgedAt: new Date(), acknowledgedBy: 'user1' };
 
-      service.acknowledgeAlert('1', { note: 'Acknowledged' }).subscribe(alert => {
-        expect(alert.status).toBe('ACKNOWLEDGED');
+      service.acknowledgeAlert('1', { acknowledgedBy: 'user1', notes: 'Acknowledged' }).subscribe(alert => {
+        expect(alert.status).toBe(AlertStatus.ACKNOWLEDGED);
         done();
       });
 
@@ -140,10 +141,10 @@ describe('AlertService', () => {
 
   describe('resolveAlert', () => {
     it('should resolve an alert', (done) => {
-      const resolvedAlert = { ...mockAlert, status: 'RESOLVED' as const };
+      const resolvedAlert = { ...mockAlert, status: AlertStatus.RESOLVED, resolvedAt: new Date(), resolvedBy: 'user1' };
 
-      service.resolveAlert('1', { note: 'Resolved' }).subscribe(alert => {
-        expect(alert.status).toBe('RESOLVED');
+      service.resolveAlert('1', { resolvedBy: 'user1', resolution: 'Resolved' }).subscribe(alert => {
+        expect(alert.status).toBe(AlertStatus.RESOLVED);
         done();
       });
 
