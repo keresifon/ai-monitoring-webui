@@ -54,7 +54,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     // Initialize form
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
-      // eslint-disable-next-line @typescript-eslint/no-hardcoded-password
       // NOSONAR
       password: ['', [Validators.required, Validators.minLength(6)]] // Form field initialization, not a hard-coded password
     });

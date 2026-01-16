@@ -15,7 +15,7 @@ export interface Alert {
   acknowledgedBy?: string;
   resolvedAt?: Date;
   resolvedBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export enum AlertSeverity {

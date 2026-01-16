@@ -100,8 +100,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     // Listen to route changes
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
         this.activeRoute = event.url;
       });
 
