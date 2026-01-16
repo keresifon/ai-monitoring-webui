@@ -445,6 +445,17 @@ mat-paginator {
       color: rgba(0, 0, 0, 0.87) !important;
     }
 
+    // Custom Snackbar Styles
+    .success-snackbar {
+      background-color: #4caf50 !important;
+      color: white !important;
+    }
+
+    .error-snackbar {
+      background-color: #f44336 !important;
+      color: white !important;
+    }
+
     .mat-mdc-select-arrow {
       color: rgba(0, 0, 0, 0.6) !important;
     }
@@ -543,17 +554,6 @@ mat-paginator {
   outline-offset: -2px;
 }
 
-// Custom Snackbar Styles (global)
-::ng-deep {
-  .success-snackbar {
-    background-color: #4caf50 !important;
-    color: white !important;
-  }
-
-  .error-snackbar {
-    background-color: #f44336 !important;
-    color: white !important;
-  }
-}
+// Custom Snackbar Styles (merged into existing ::ng-deep block above)
 
 // Made with Bob

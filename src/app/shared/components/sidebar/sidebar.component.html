@@ -1,7 +1,7 @@
 <aside class="sidebar" [class.open]="isOpen">
   <div class="sidebar-content">
     <!-- Main Navigation -->
-    <nav class="nav-section">
+    <nav class="nav-section" aria-label="Main navigation">
       <h3 class="section-title">MAIN MENU</h3>
       <mat-nav-list>
         <mat-list-item
@@ -24,7 +24,7 @@
     <mat-divider></mat-divider>
 
     <!-- Admin Section -->
-    <nav class="nav-section" *ngIf="hasAdminAccess()">
+    <nav class="nav-section" *ngIf="hasAdminAccess()" aria-label="Admin navigation">
       <h3 class="section-title">ADMIN</h3>
       <mat-nav-list>
         <mat-list-item

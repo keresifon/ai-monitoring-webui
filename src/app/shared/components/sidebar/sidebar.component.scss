@@ -27,6 +27,31 @@
     @media (max-width: 1023px) {
       width: 240px;
     }
+
+    .section-title {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    mat-list-item {
+      justify-content: center;
+
+      mat-icon {
+        margin-right: 0;
+      }
+
+      span {
+        display: none;
+      }
+    }
+
+    .sidebar-footer {
+      display: none;
+    }
+
+    mat-divider {
+      margin: 8px;
+    }
   }
 
   .sidebar-content {
@@ -145,33 +170,7 @@
   }
 }
 
-// Collapsed state
-.sidebar:not(.open) {
-  .section-title {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  mat-list-item {
-    justify-content: center;
-
-    mat-icon {
-      margin-right: 0;
-    }
-
-    span {
-      display: none;
-    }
-  }
-
-  .sidebar-footer {
-    display: none;
-  }
-
-  mat-divider {
-    margin: 8px;
-  }
-}
+// Collapsed state styles merged into &:not(.open) above
 
 // Responsive Design
 @media (max-width: 1023px) {

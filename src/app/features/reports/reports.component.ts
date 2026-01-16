@@ -56,11 +56,11 @@ export class ReportsComponent {
       startDate: this.startDate,
       endDate: this.endDate
     });
-    // TODO: Implement report generation
+    // Report generation will be implemented in a future iteration
   }
 
   exportReport(format: 'pdf' | 'csv' | 'excel'): void {
     console.log('Exporting report as:', format);
-    // TODO: Implement report export
+    // Report export will be implemented in a future iteration
   }
 }

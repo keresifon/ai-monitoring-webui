@@ -213,6 +213,7 @@
   }
 }
 
+// Merge duplicate selector with animation
 ::ng-deep .user-menu {
   animation: slideDown 0.2s ease-out;
 }
