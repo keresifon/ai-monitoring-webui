@@ -1,8 +1,7 @@
-import { TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, RegisterRequest, User } from '../../shared/models/auth.model';
@@ -134,7 +133,7 @@ describe('AuthService', () => {
         password: 'password123'
       };
 
-      let loadingStates: boolean[] = [];
+      const loadingStates: boolean[] = [];
       const loadingSub = service.loading$.subscribe(loading => {
         loadingStates.push(loading);
       });

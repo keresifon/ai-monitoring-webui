@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -16,7 +17,7 @@ describe('SidebarComponent', () => {
   let authService: jasmine.SpyObj<AuthService>;
   let alertService: jasmine.SpyObj<AlertService>;
   let router: Router;
-  let routerEvents: Subject<any>;
+  let routerEvents: Subject<unknown>;
 
   beforeEach(async () => {
     routerEvents = new Subject();

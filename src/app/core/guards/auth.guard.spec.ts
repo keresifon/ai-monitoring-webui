@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
@@ -24,8 +25,11 @@ describe('Auth Guards', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           { path: 'login', component: {} as any },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           { path: 'dashboard', component: {} as any },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           { path: 'unauthorized', component: {} as any }
         ]),
         { provide: AuthService, useValue: authServiceSpy }

@@ -1,6 +1,5 @@
-import { TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { AlertService } from './alert.service';
 import { environment } from '../../../environments/environment';
 import { Alert, AlertFilter, AlertSeverity, AlertStatus } from '../../shared/models/alert.model';
