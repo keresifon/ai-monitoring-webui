@@ -1,0 +1,178 @@
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+  <h1>AI Log Monitoring Dashboard</h1>
+  <button mat-raised-button color="primary" (click)="refresh()" [disabled]="isLoading">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+</div>
+
+<!-- Loading Spinner -->
+<div *ngIf="isLoading" class="loading-container">
+  <mat-spinner></mat-spinner>
+  <p>Loading dashboard data...</p>
+</div>
+
+<!-- Error Message -->
+<div *ngIf="error" class="error-container">
+  <mat-icon color="warn">error</mat-icon>
+  <p>{{ error }}</p>
+  <button mat-raised-button color="primary" (click)="refresh()">Retry</button>
+</div>
+
+<!-- Dashboard Content -->
+<div *ngIf="!isLoading && !error" class="dashboard-content">
+  
+  <!-- Metrics Cards -->
+  <div class="metrics-grid">
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon">
+          <mat-icon color="primary">description</mat-icon>
+        </div>
+        <div class="metric-info">
+          <h3>Total Logs</h3>
+          <p class="metric-value">{{ formatNumber(metrics?.totalLogs || 0) }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon">
+          <mat-icon color="warn">warning</mat-icon>
+        </div>
+        <div class="metric-info">
+          <h3>Anomalies</h3>
+          <p class="metric-value">{{ formatNumber(metrics?.totalAnomalies || 0) }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon">
+          <mat-icon color="accent">notifications_active</mat-icon>
+        </div>
+        <div class="metric-info">
+          <h3>Active Alerts</h3>
+          <p class="metric-value">{{ metrics?.activeAlerts || 0 }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon">
+          <mat-icon [color]="(metrics?.errorRate || 0) > 5 ? 'warn' : 'primary'">error_outline</mat-icon>
+        </div>
+        <div class="metric-info">
+          <h3>Error Rate</h3>
+          <p class="metric-value">{{ (metrics?.errorRate || 0).toFixed(2) }}%</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    
+    <!-- Log Volume Chart -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>show_chart</mat-icon>
+          Log Volume Over Time
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container">
+          <canvas #logVolumeCanvas></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Log Level Distribution Chart -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>pie_chart</mat-icon>
+          Log Level Distribution
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container">
+          <canvas #logLevelCanvas></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Top Services Chart -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>bar_chart</mat-icon>
+          Top Services by Log Count
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container">
+          <canvas #topServicesCanvas></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Anomaly Detection Chart -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>scatter_plot</mat-icon>
+          Anomaly Detection Timeline
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container">
+          <canvas #anomalyCanvas></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Recent Alerts -->
+  <mat-card class="alerts-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>notifications</mat-icon>
+        Recent Alerts
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="recentAlerts.length === 0" class="no-alerts">
+        <mat-icon>check_circle</mat-icon>
+        <p>No recent alerts</p>
+      </div>
+
+      <div *ngIf="recentAlerts.length > 0" class="alerts-list">
+        <div *ngFor="let alert of recentAlerts" class="alert-item">
+          <div class="alert-header">
+            <mat-chip [color]="getSeverityColor(alert.severity)" selected>
+              {{ alert.severity }}
+            </mat-chip>
+            <mat-chip [color]="getStatusColor(alert.status)" selected>
+              {{ alert.status }}
+            </mat-chip>
+            <span class="alert-time">{{ formatTimestamp(alert.triggeredAt) }}</span>
+          </div>
+          <h4 class="alert-title">{{ alert.title }}</h4>
+          <p class="alert-message">{{ alert.message }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Last Updated -->
+  <div class="last-updated" *ngIf="metrics && metrics.lastUpdated">
+    <mat-icon>schedule</mat-icon>
+    <span>Last updated: {{ formatTimestamp(metrics.lastUpdated.toString()) }}</span>
+  </div>
+</div>

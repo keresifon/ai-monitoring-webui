@@ -1,0 +1,91 @@
+<!-- Reports Header -->
+<div class="reports-header">
+  <h1>Reports & Exports</h1>
+  <button mat-raised-button color="primary" (click)="generateReport()">
+    <mat-icon>description</mat-icon>
+    Generate Report
+  </button>
+</div>
+
+<!-- Report Configuration -->
+<div class="reports-content">
+  <mat-card class="config-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings</mat-icon>
+        Report Configuration
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="config-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Report Type</mat-label>
+          <mat-select [(ngModel)]="selectedReportType">
+            <mat-option *ngFor="let type of reportTypes" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Report Templates -->
+  <div class="report-templates">
+    <h2>Report Templates</h2>
+    <div class="templates-grid">
+      <mat-card class="template-card" *ngFor="let type of reportTypes">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>description</mat-icon>
+            {{ type.label }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Generate a {{ type.label.toLowerCase() }} for the selected time period.</p>
+          <div class="template-actions">
+            <button mat-button color="primary" (click)="selectedReportType = type.value; generateReport()">
+              Generate
+            </button>
+            <button mat-icon-button (click)="exportReport('pdf')" matTooltip="Export as PDF">
+              <mat-icon>picture_as_pdf</mat-icon>
+            </button>
+            <button mat-icon-button (click)="exportReport('csv')" matTooltip="Export as CSV">
+              <mat-icon>file_download</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Recent Reports -->
+  <mat-card class="recent-reports-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>history</mat-icon>
+        Recent Reports
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="no-reports">
+        <mat-icon>description</mat-icon>
+        <p>No reports generated yet. Use the configuration above to generate your first report.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

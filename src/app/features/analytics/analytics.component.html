@@ -1,0 +1,170 @@
+<!-- Analytics Header -->
+<div class="analytics-header">
+  <h1>Analytics & Insights</h1>
+  <div class="header-actions">
+    <mat-form-field appearance="outline">
+      <mat-label>Time Range</mat-label>
+      <mat-select [(ngModel)]="selectedTimeRange">
+        <mat-option value="24h">Last 24 Hours</mat-option>
+        <mat-option value="7d">Last 7 Days</mat-option>
+        <mat-option value="30d">Last 30 Days</mat-option>
+        <mat-option value="90d">Last 90 Days</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Service</mat-label>
+      <mat-select [(ngModel)]="selectedService">
+        <mat-option value="all">All Services</mat-option>
+        <mat-option value="auth-service">Auth Service</mat-option>
+        <mat-option value="log-service">Log Service</mat-option>
+        <mat-option value="alert-service">Alert Service</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<!-- Analytics Content -->
+<div class="analytics-content">
+  <mat-tab-group>
+    <!-- Performance Analytics -->
+    <mat-tab label="Performance">
+      <div class="tab-content">
+        <div class="analytics-grid">
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>speed</mat-icon>
+                Response Time Trends
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Response time analysis chart will be displayed here</p>
+                <mat-icon>show_chart</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>memory</mat-icon>
+                Resource Utilization
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Resource utilization metrics will be displayed here</p>
+                <mat-icon>bar_chart</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>trending_up</mat-icon>
+                Throughput Analysis
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Throughput trends will be displayed here</p>
+                <mat-icon>timeline</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Error Analytics -->
+    <mat-tab label="Error Analysis">
+      <div class="tab-content">
+        <div class="analytics-grid">
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>error_outline</mat-icon>
+                Error Rate Trends
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Error rate analysis will be displayed here</p>
+                <mat-icon>show_chart</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>bug_report</mat-icon>
+                Error Patterns
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Error pattern analysis will be displayed here</p>
+                <mat-icon>pie_chart</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>warning</mat-icon>
+                Top Error Sources
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Top error sources will be displayed here</p>
+                <mat-icon>list</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- User Analytics -->
+    <mat-tab label="User Behavior">
+      <div class="tab-content">
+        <div class="analytics-grid">
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>people</mat-icon>
+                Active Users
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Active user trends will be displayed here</p>
+                <mat-icon>show_chart</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>access_time</mat-icon>
+                Usage Patterns
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-placeholder">
+                <p>Usage pattern analysis will be displayed here</p>
+                <mat-icon>bar_chart</mat-icon>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

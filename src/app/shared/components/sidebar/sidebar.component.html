@@ -1,0 +1,52 @@
+<aside class="sidebar" [class.open]="isOpen">
+  <div class="sidebar-content">
+    <!-- Main Navigation -->
+    <nav class="nav-section">
+      <h3 class="section-title">MAIN MENU</h3>
+      <mat-nav-list>
+        <mat-list-item
+          *ngFor="let item of getVisibleNavItems()"
+          [routerLink]="item.route"
+          [class.active]="isActive(item.route)"
+          [matTooltip]="item.label"
+          matTooltipPosition="right"
+          [matTooltipDisabled]="isOpen"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle *ngIf="isOpen">{{ item.label }}</span>
+          <span matListItemMeta *ngIf="isOpen && item.badge" class="badge">
+            {{ item.badge }}
+          </span>
+        </mat-list-item>
+      </mat-nav-list>
+    </nav>
+
+    <mat-divider></mat-divider>
+
+    <!-- Admin Section -->
+    <nav class="nav-section" *ngIf="hasAdminAccess()">
+      <h3 class="section-title">ADMIN</h3>
+      <mat-nav-list>
+        <mat-list-item
+          *ngFor="let item of getVisibleAdminItems()"
+          [routerLink]="item.route"
+          [class.active]="isActive(item.route)"
+          [matTooltip]="item.label"
+          matTooltipPosition="right"
+          [matTooltipDisabled]="isOpen"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle *ngIf="isOpen">{{ item.label }}</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer" *ngIf="isOpen">
+      <div class="version-info">
+        <mat-icon>info</mat-icon>
+        <span>Version 1.0.0</span>
+      </div>
+    </div>
+  </div>
+</aside>

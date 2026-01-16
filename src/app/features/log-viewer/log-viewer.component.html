@@ -1,0 +1,191 @@
+<div class="log-viewer-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <mat-icon>list_alt</mat-icon>
+      Log Viewer
+    </h1>
+    <div class="header-actions">
+      <button mat-icon-button (click)="refresh()" matTooltip="Refresh" aria-label="Refresh logs">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button mat-stroked-button (click)="exportToCsv()" matTooltip="Export to CSV">
+        <mat-icon>download</mat-icon>
+        CSV
+      </button>
+      <button mat-stroked-button (click)="exportToJson()" matTooltip="Export to JSON">
+        <mat-icon>download</mat-icon>
+        JSON
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-grid">
+        <!-- Search -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Search message</mat-label>
+          <input matInput [formControl]="searchControl" aria-label="Search logs">
+          <mat-icon matPrefix>search</mat-icon>
+          <button mat-icon-button matSuffix *ngIf="searchControl.value" (click)="searchControl.setValue('')" aria-label="Clear search">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Level Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Log Level</mat-label>
+          <mat-select [formControl]="levelControl" aria-label="Filter by log level">
+            <mat-option [value]="null">All Levels</mat-option>
+            <mat-option *ngFor="let level of logLevels" [value]="level">
+              <span [style.color]="getLogLevelColor(level)">{{ level }}</span>
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>filter_list</mat-icon>
+        </mat-form-field>
+
+        <!-- Service Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Service</mat-label>
+          <input matInput [formControl]="serviceControl" [matAutocomplete]="auto" aria-label="Filter by service">
+          <mat-icon matPrefix>dns</mat-icon>
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let service of filteredServices" [value]="service">
+              {{ service }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <!-- Date Range -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [formControl]="startDateControl" aria-label="Start date">
+          <mat-datepicker-toggle matPrefix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [formControl]="endDateControl" aria-label="End date">
+          <mat-datepicker-toggle matPrefix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Clear Filters -->
+        <button mat-raised-button color="warn" (click)="clearFilters()" class="clear-button" aria-label="Clear all filters">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading && dataSource.data.length === 0" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading logs...</p>
+  </div>
+
+  <!-- Error State -->
+  <mat-card *ngIf="isError && !isLoading" class="error-card">
+    <mat-card-content>
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ errorMessage }}</p>
+      <button mat-raised-button color="primary" (click)="loadLogs()">Retry</button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table -->
+  <div class="table-container" *ngIf="!isError || dataSource.data.length > 0">
+    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSortChange()" 
+           class="logs-table" [trackBy]="trackByLogId">
+
+      <!-- Timestamp Column -->
+      <ng-container matColumnDef="timestamp">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Timestamp</th>
+        <td mat-cell *matCellDef="let log">
+          <span class="timestamp">{{ formatTimestamp(log.timestamp) }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Level Column -->
+      <ng-container matColumnDef="level">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
+        <td mat-cell *matCellDef="let log">
+          <mat-chip [style.background-color]="getLogLevelColor(log.level)" class="level-chip">
+            {{ log.level }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Service Column -->
+      <ng-container matColumnDef="service">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Service</th>
+        <td mat-cell *matCellDef="let log">
+          <span class="service-name">{{ log.service }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Message Column -->
+      <ng-container matColumnDef="message">
+        <th mat-header-cell *matHeaderCellDef>Message</th>
+        <td mat-cell *matCellDef="let log" class="message-cell">
+          <span [matTooltip]="log.message" matTooltipPosition="above">
+            {{ truncateMessage(log.message) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let log">
+          <button mat-icon-button (click)="viewLogDetail(log)" matTooltip="View details" aria-label="View log details">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Table Rows -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+          class="log-row" 
+          (click)="viewLogDetail(row)"
+          role="button"
+          tabindex="0"
+          (keydown.enter)="viewLogDetail(row)"
+          (keydown.space)="viewLogDetail(row)">
+      </tr>
+
+      <!-- No Data Row -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+          <mat-icon>inbox</mat-icon>
+          <p>No logs found</p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator 
+      [length]="totalLogs"
+      [pageSize]="50"
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      (page)="onPageChange()"
+      showFirstLastButtons
+      aria-label="Select page of logs">
+    </mat-paginator>
+  </div>
+
+  <!-- Results Info -->
+  <div class="results-info" *ngIf="!isLoading && !isError">
+    <mat-icon>info</mat-icon>
+    <span>Showing {{ dataSource.data.length }} of {{ totalLogs }} logs</span>
+    <span class="auto-refresh-indicator">
+      <mat-icon>sync</mat-icon>
+      Auto-refresh: 30s
+    </span>
+  </div>
+</div>

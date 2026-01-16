@@ -1,0 +1,400 @@
+// Dashboard Component Styles
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 24px;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.87);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+  box-shadow: none;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 16px;
+  }
+}
+
+.dashboard-content {
+  padding: 0;
+}
+
+// Metrics Grid
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    padding: 24px !important;
+    background-color: #ffffff;
+  }
+
+  .metric-icon {
+    margin-right: 20px;
+
+    mat-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      opacity: 0.7;
+    }
+  }
+
+  .metric-info {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .metric-value {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 300;
+      color: rgba(0, 0, 0, 0.87);
+      letter-spacing: -0.5px;
+    }
+  }
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transform: none;
+  }
+}
+
+// Charts Grid
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  
+  mat-card-header {
+    background-color: transparent;
+    padding: 20px 20px 12px 20px;
+    margin: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 20px !important;
+    background-color: #ffffff;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    canvas {
+      max-height: 100%;
+      max-width: 100%;
+      background-color: #ffffff;
+      display: block;
+    }
+  }
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+}
+
+// Alerts Card
+.alerts-card {
+  margin-bottom: 32px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  mat-card-header {
+    background-color: transparent;
+    padding: 20px 20px 12px 20px;
+    margin: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  mat-card-content {
+    background-color: #ffffff;
+    padding: 20px !important;
+  }
+
+  .no-alerts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px;
+    color: rgba(0, 0, 0, 0.5);
+    background-color: #ffffff;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      color: rgba(0, 0, 0, 0.3);
+      opacity: 0.5;
+    }
+
+    p {
+      font-size: 14px;
+      margin: 0;
+    }
+  }
+
+  .alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .alert-item {
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: none;
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+
+      mat-chip {
+        font-size: 12px;
+        font-weight: 500;
+        height: 24px;
+        padding: 0 8px;
+      }
+
+      .alert-time {
+        margin-left: auto;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    .alert-title {
+      margin: 0 0 6px 0;
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .alert-message {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 1.6;
+    }
+  }
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+}
+
+// Last Updated
+.last-updated {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+
+  mat-icon {
+    margin-right: 6px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+
+    h1 {
+      font-size: 24px;
+    }
+  }
+
+  .chart-card {
+    .chart-container {
+      height: 250px;
+
+      canvas {
+        max-height: 250px;
+      }
+    }
+  }
+
+  .alert-item {
+    .alert-header {
+      .alert-time {
+        margin-left: 0;
+        width: 100%;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+// Animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.metric-card,
+.chart-card,
+.alerts-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Print Styles
+@media print {
+  .dashboard-header button {
+    display: none;
+  }
+
+  .chart-card,
+  .metric-card,
+  .alerts-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+// Made with Bob

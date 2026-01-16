@@ -1,0 +1,110 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// Global Material form field input text styling for minimalist theme
+::ng-deep {
+  // Direct input element targeting - highest priority
+  input.mat-mdc-input-element,
+  input[matInput],
+  textarea.mat-mdc-input-element,
+  textarea[matInput] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    caret-color: #000000 !important;
+  }
+
+  // Material MDC form field structure
+  .mat-mdc-form-field {
+    // Input control wrapper
+    .mat-mdc-text-field-wrapper {
+      .mat-mdc-form-field-flex {
+        .mat-mdc-form-field-input-control {
+          input,
+          textarea {
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            caret-color: #000000 !important;
+          }
+
+          // Direct child input
+          > input,
+          > textarea {
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            caret-color: #000000 !important;
+          }
+        }
+      }
+    }
+
+    // Select value text
+    .mat-mdc-select-value {
+      color: #000000 !important;
+    }
+  }
+
+  // Material input base styling
+  .mat-mdc-input-element {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    caret-color: #000000 !important;
+  }
+
+  // Native input elements - direct targeting
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    caret-color: #000000 !important;
+  }
+
+  // Autocomplete input
+  .mat-mdc-autocomplete-trigger {
+    input {
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+      caret-color: #000000 !important;
+    }
+  }
+
+  // Override autofill styles
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #000000 !important;
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    box-shadow: 0 0 0 30px white inset !important;
+  }
+
+  // MDC text field input - direct targeting
+  .mdc-text-field__input {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    caret-color: #000000 !important;
+  }
+
+  // Material form field input - all variations
+  mat-form-field {
+    .mdc-text-field__input {
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+      caret-color: #000000 !important;
+    }
+
+    input.mdc-text-field__input,
+    textarea.mdc-text-field__input {
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+      caret-color: #000000 !important;
+    }
+  }
+}

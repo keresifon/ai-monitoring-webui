@@ -1,0 +1,18 @@
+<!-- Layout with Navigation -->
+<div class="app-container" *ngIf="showNavigation">
+  <!-- Navbar -->
+  <app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
+
+  <!-- Sidebar -->
+  <app-sidebar [isOpen]="isSidebarOpen"></app-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-open]="isSidebarOpen">
+    <router-outlet />
+  </main>
+</div>
+
+<!-- Layout without Navigation (Login, Register, etc.) -->
+<div class="app-container-full" *ngIf="!showNavigation">
+  <router-outlet />
+</div>

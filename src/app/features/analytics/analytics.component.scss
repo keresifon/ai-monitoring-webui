@@ -1,0 +1,118 @@
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 24px;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.87);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+  box-shadow: none;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 16px;
+
+    mat-form-field {
+      width: 200px;
+      background: white;
+      border-radius: 0;
+    }
+  }
+}
+
+.analytics-content {
+  padding: 0;
+
+  .tab-content {
+    padding: 24px 0;
+  }
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  mat-card-header {
+    background-color: transparent;
+    padding: 20px 20px 12px 20px;
+    margin: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  mat-card-content {
+    background-color: #ffffff;
+    padding: 20px !important;
+  }
+
+  .chart-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    min-height: 300px;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    background-color: #ffffff;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-top: 16px;
+      opacity: 0.3;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
