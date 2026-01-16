@@ -10,7 +10,7 @@
         <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>First Name</mat-label>
-            <input matInput formControlName="firstName" name="firstName" placeholder="John" autocomplete="given-name">
+            <input matInput formControlName="firstName" name="firstName" placeholder="John" [attr.autocomplete]="'given-name'">
             <mat-icon matPrefix>person</mat-icon>
             <mat-error *ngIf="firstName?.hasError('required')">
               First name is required
@@ -19,7 +19,7 @@
 
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Last Name</mat-label>
-            <input matInput formControlName="lastName" name="lastName" placeholder="Doe" autocomplete="family-name">
+            <input matInput formControlName="lastName" name="lastName" placeholder="Doe" [attr.autocomplete]="'family-name'">
             <mat-icon matPrefix>person</mat-icon>
             <mat-error *ngIf="lastName?.hasError('required')">
               Last name is required
@@ -29,7 +29,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Username</mat-label>
-          <input matInput formControlName="username" name="username" placeholder="johndoe" autocomplete="username">
+          <input matInput formControlName="username" name="username" placeholder="johndoe" [attr.autocomplete]="'username'">
           <mat-icon matPrefix>account_circle</mat-icon>
           <mat-error *ngIf="username?.hasError('required')">
             Username is required
@@ -44,7 +44,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" name="email" placeholder="john@example.com" autocomplete="email">
+          <input matInput type="email" formControlName="email" name="email" placeholder="john@example.com" [attr.autocomplete]="'email'">
           <mat-icon matPrefix>email</mat-icon>
           <mat-error *ngIf="email?.hasError('required')">
             Email is required
@@ -56,7 +56,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" name="password" autocomplete="new-password">
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" name="password" [attr.autocomplete]="'new-password'">
           <mat-icon matPrefix>lock</mat-icon>
           <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
             <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
@@ -71,7 +71,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Confirm Password</mat-label>
-          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" name="confirmPassword" autocomplete="new-password">
+          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" name="confirmPassword" [attr.autocomplete]="'new-password'">
           <mat-icon matPrefix>lock</mat-icon>
           <button mat-icon-button matSuffix type="button" (click)="hideConfirmPassword = !hideConfirmPassword">
             <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>

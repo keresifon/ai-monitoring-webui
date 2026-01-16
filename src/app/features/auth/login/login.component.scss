@@ -258,20 +258,20 @@
 // Snackbar Styles
 ::ng-deep {
   .success-snackbar {
-    background-color: #4caf50 !important;
-    color: white !important;
+    background-color: #2e7d32 !important; // Darker green for better contrast
+    color: #ffffff !important; // Pure white for maximum contrast
 
     .mat-simple-snackbar-action {
-      color: white !important;
+      color: #ffffff !important; // Pure white for maximum contrast
     }
   }
 
   .error-snackbar {
-    background-color: #f44336 !important;
-    color: white !important;
+    background-color: #c62828 !important; // Darker red for better contrast
+    color: #ffffff !important; // Pure white for maximum contrast
 
     .mat-simple-snackbar-action {
-      color: white !important;
+      color: #ffffff !important; // Pure white for maximum contrast
     }
   }
 }

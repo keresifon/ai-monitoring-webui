@@ -20,7 +20,7 @@
               formControlName="username"
               name="username"
               placeholder="Enter your username"
-              autocomplete="username"
+              [attr.autocomplete]="'username'"
             />
             <mat-icon matPrefix>person</mat-icon>
             <mat-error *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
@@ -37,7 +37,7 @@
               formControlName="password"
               name="password"
               placeholder="Enter your password"
-              autocomplete="current-password"
+              [attr.autocomplete]="'current-password'"
             />
             <mat-icon matPrefix>lock</mat-icon>
             <button
