@@ -49,37 +49,51 @@ jobs:
       - name: Verify coverage file exists
         id: coverage-check
         run: |
+          echo "Searching for coverage file..."
+          echo "Checking coverage directory structure:"
+          ls -la coverage/ 2>/dev/null || echo "Coverage directory does not exist"
+          
+          if [ -d "coverage/ai-monitoring-ui" ]; then
+            echo "Contents of coverage/ai-monitoring-ui:"
+            ls -la coverage/ai-monitoring-ui/ 2>/dev/null || echo "Directory is empty"
+            echo "Searching for .info files:"
+            find coverage/ai-monitoring-ui -name "*.info" -type f 2>/dev/null || echo "No .info files found"
+          fi
+          
           # Check for coverage file in common locations
           COVERAGE_FILE=""
           if [ -f "coverage/lcov.info" ]; then
             COVERAGE_FILE="coverage/lcov.info"
+            echo "Found at: coverage/lcov.info"
           elif [ -f "coverage/ai-monitoring-ui/lcov.info" ]; then
             COVERAGE_FILE="coverage/ai-monitoring-ui/lcov.info"
+            echo "Found at: coverage/ai-monitoring-ui/lcov.info"
           else
-            # Try to find it
-            COVERAGE_FILE=$(find . -name "lcov.info" -type f 2>/dev/null | head -n 1)
+            # Try to find it recursively
+            echo "Searching recursively for lcov.info..."
+            COVERAGE_FILE=$(find . -path "*/node_modules" -prune -o -name "lcov.info" -type f -print 2>/dev/null | head -n 1)
+            if [ -n "$COVERAGE_FILE" ]; then
+              echo "Found at: $COVERAGE_FILE"
+            fi
           fi
           
           if [ -n "$COVERAGE_FILE" ] && [ -f "$COVERAGE_FILE" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "coverage_file=$COVERAGE_FILE" >> $GITHUB_OUTPUT
-            echo "Coverage file found at $COVERAGE_FILE"
+            echo "✓ Coverage file found at $COVERAGE_FILE"
             echo "File size:"
             ls -lh "$COVERAGE_FILE"
-            echo "First 50 lines of coverage file:"
-            head -n 50 "$COVERAGE_FILE" || echo "File is empty or unreadable"
-            echo "Coverage summary:"
+            echo "First 20 lines of coverage file:"
+            head -n 20 "$COVERAGE_FILE" || echo "File is empty or unreadable"
+            echo "Coverage summary (first 10 entries):"
             grep -E "^SF:|^LF:|^LH:" "$COVERAGE_FILE" | head -n 10 || echo "No coverage data found"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Coverage file not found. Checking for alternative locations..."
-            find . -name "lcov.info" -type f 2>/dev/null || echo "No lcov.info file found"
-            echo "Checking coverage directory:"
-            ls -la coverage/ 2>/dev/null || echo "Coverage directory does not exist"
-            if [ -d "coverage" ]; then
-              echo "Coverage directory contents:"
-              find coverage -type f -name "*.info" 2>/dev/null || echo "No .info files found"
-            fi
+            echo "✗ Coverage file not found"
+            echo "All .info files in coverage directory:"
+            find coverage -type f -name "*.info" 2>/dev/null || echo "No .info files found"
+            echo "All files in coverage directory:"
+            find coverage -type f 2>/dev/null | head -n 20 || echo "No files found"
           fi
 
       - name: Cache SonarCloud packages
