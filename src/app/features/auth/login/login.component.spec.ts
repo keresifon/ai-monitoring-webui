@@ -119,12 +119,10 @@ describe('LoginComponent', () => {
     expect(component.loginForm.get('password')?.touched).toBe(true);
   });
 
-  xit('should submit valid form and navigate on success', fakeAsync(() => {
+  it('should submit valid form and navigate on success', (done) => {
     fixture.detectChanges();
     
-    // Use a Subject to control when the observable emits
-    const loginSubject = new Subject<LoginResponse>();
-    authService.login.and.returnValue(loginSubject.asObservable());
+    authService.login.and.returnValue(of(mockLoginResponse));
 
     component.loginForm.patchValue({
       username: 'testuser',
@@ -138,19 +136,15 @@ describe('LoginComponent', () => {
       password: 'password123'
     } as LoginRequest);
     
-    // Emit the response to trigger the callback
-    loginSubject.next(mockLoginResponse);
-    loginSubject.complete();
-    
-    // Process microtasks to ensure the subscribe callback executes
-    tick(0);
-    // Advance time to allow snackbar timer to complete (default duration is 3000ms)
-    tick(3000);
-    fixture.detectChanges();
-    
-    expect(snackBar.open).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
-  }));
+    // of() completes synchronously, but subscribe callbacks execute in microtasks
+    // Use setTimeout to ensure the callback executes
+    setTimeout(() => {
+      fixture.detectChanges();
+      expect(snackBar.open).toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+      done();
+    }, 0);
+  });
 
   it('should handle login error', waitForAsync(() => {
     fixture.detectChanges();
