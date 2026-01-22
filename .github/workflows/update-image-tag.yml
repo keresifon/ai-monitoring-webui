@@ -1,0 +1,122 @@
+name: Update Image Tag
+
+on:
+  # Trigger when a new release/tag is created in this repository
+  release:
+    types: [published, created]
+  # Trigger when a new tag is pushed
+  push:
+    tags:
+      - 'v*'
+      - '*.*.*'
+  # Allow triggering from another workflow (e.g., when image is built)
+  repository_dispatch:
+    types: [image-pushed, new-tag]
+  # Allow manual triggering with optional tag input
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Specific tag to use (leave empty to use latest)'
+        required: false
+        type: string
+
+jobs:
+  update-image-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml requests
+
+      - name: Determine tag to use
+        id: determine-tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MANUAL_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          PUSH_TAG: ${{ github.ref_name }}
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          # Priority: manual input > release tag > push tag > dispatch tag > latest from registry
+          if [ -n "$MANUAL_TAG" ]; then
+            echo "tag=$MANUAL_TAG" >> $GITHUB_OUTPUT
+            echo "source=manual" >> $GITHUB_OUTPUT
+          elif [ -n "$RELEASE_TAG" ]; then
+            echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+            echo "source=release" >> $GITHUB_OUTPUT
+          elif [ -n "$PUSH_TAG" ] && [[ "$PUSH_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$PUSH_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "tag=$PUSH_TAG" >> $GITHUB_OUTPUT
+            echo "source=push" >> $GITHUB_OUTPUT
+          elif [ -n "$DISPATCH_TAG" ]; then
+            echo "tag=$DISPATCH_TAG" >> $GITHUB_OUTPUT
+            echo "source=dispatch" >> $GITHUB_OUTPUT
+          else
+            # Get latest from registry
+            LATEST_TAG=$(python scripts/update-image-tag.py --get-latest)
+            echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "source=registry" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get current tag from values.yaml
+        id: current-tag
+        run: |
+          CURRENT_TAG=$(python -c "import yaml; f=open('charts/values.yaml'); d=yaml.safe_load(f); print(d.get('image', {}).get('tag', 'latest'))")
+          echo "tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Check if update is needed
+        id: check-update
+        run: |
+          if [ "${{ steps.determine-tag.outputs.tag }}" = "${{ steps.current-tag.outputs.tag }}" ]; then
+            echo "needed=false" >> $GITHUB_OUTPUT
+            echo "Tags are already in sync (${{ steps.current-tag.outputs.tag }})"
+          else
+            echo "needed=true" >> $GITHUB_OUTPUT
+            echo "Update needed: ${{ steps.current-tag.outputs.tag }} -> ${{ steps.determine-tag.outputs.tag }}"
+          fi
+
+      - name: Update values.yaml
+        if: steps.check-update.outputs.needed == 'true'
+        env:
+          NEW_TAG: ${{ steps.determine-tag.outputs.tag }}
+        run: |
+          python scripts/update-image-tag.py --update --tag "$NEW_TAG"
+
+      - name: Commit and push changes
+        if: steps.check-update.outputs.needed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add charts/values.yaml
+          git commit -m "chore: update image tag to ${{ steps.determine-tag.outputs.tag }} [auto-update]"
+          git push
+
+      - name: Create Pull Request (if direct push fails)
+        if: steps.check-update.outputs.needed == 'true' && failure()
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update image tag to ${{ steps.determine-tag.outputs.tag }} [auto-update]'
+          title: 'chore: Update image tag to ${{ steps.determine-tag.outputs.tag }}'
+          body: |
+            This PR automatically updates the image tag in `charts/values.yaml` to the new tag.
+            
+            **New tag:** ${{ steps.determine-tag.outputs.tag }}
+            **Previous tag:** ${{ steps.current-tag.outputs.tag }}
+            **Triggered by:** ${{ steps.determine-tag.outputs.source }}
+          branch: update-image-tag-${{ steps.determine-tag.outputs.tag }}
+          delete-branch: true
