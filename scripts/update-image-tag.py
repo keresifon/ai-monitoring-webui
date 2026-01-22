@@ -34,15 +34,16 @@ def get_latest_tag_from_ghcr(repository: str, github_token: Optional[str] = None
     
     owner, repo = repo_path.split('/', 1)
     
-    # GHCR API endpoint
-    url = f"https://api.github.com/orgs/{owner}/packages/container/{repo}/versions"
-    
     headers = {
         'Accept': 'application/vnd.github.v3+json',
     }
     
     if github_token:
         headers['Authorization'] = f'token {github_token}'
+    
+    # Try user endpoint first (for user-owned packages)
+    # If that fails with 404, try org endpoint
+    url = f"https://api.github.com/users/{owner}/packages/container/{repo}/versions"
     
     try:
         response = requests.get(url, headers=headers, timeout=10)
@@ -83,6 +84,52 @@ def get_latest_tag_from_ghcr(repository: str, github_token: Optional[str] = None
         latest_tag = sorted(tags, key=tag_sort_key, reverse=True)[0]
         return latest_tag
         
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            # Try organization endpoint
+            url = f"https://api.github.com/orgs/{owner}/packages/container/{repo}/versions"
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                response.raise_for_status()
+                
+                versions = response.json()
+                if not versions:
+                    print(f"No versions found for {repository}", file=sys.stderr)
+                    return None
+                
+                # Get the most recent version (first in the list)
+                tags = []
+                for version in versions:
+                    metadata = version.get('metadata', {})
+                    container = metadata.get('container', {})
+                    version_tags = container.get('tags', [])
+                    tags.extend(version_tags)
+                
+                # Remove 'latest' and get the most recent tag
+                tags = [t for t in tags if t != 'latest']
+                
+                if not tags:
+                    print(f"No tags found (excluding 'latest') for {repository}", file=sys.stderr)
+                    return None
+                
+                # Sort tags - prefer semantic versions, then lexicographic
+                def tag_sort_key(tag):
+                    parts = tag.split('.')
+                    if len(parts) >= 3:
+                        try:
+                            return tuple(int(p) for p in parts[:3])
+                        except ValueError:
+                            pass
+                    return (0, 0, 0, tag)
+                
+                latest_tag = sorted(tags, key=tag_sort_key, reverse=True)[0]
+                return latest_tag
+            except requests.exceptions.RequestException as e2:
+                print(f"Error fetching tags from GHCR (tried both user and org endpoints): {e2}", file=sys.stderr)
+                return None
+        else:
+            print(f"Error fetching tags from GHCR: {e}", file=sys.stderr)
+            return None
     except requests.exceptions.RequestException as e:
         print(f"Error fetching tags from GHCR: {e}", file=sys.stderr)
         return None
