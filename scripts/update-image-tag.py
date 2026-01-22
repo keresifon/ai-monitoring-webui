@@ -5,6 +5,7 @@ from GitHub Container Registry (GHCR).
 """
 
 import argparse
+import os
 import re
 import sys
 import yaml
@@ -150,7 +151,7 @@ def main():
         print(f"Error: {values_file} not found", file=sys.stderr)
         sys.exit(1)
     
-    github_token = args.github_token or sys.environ.get('GITHUB_TOKEN')
+    github_token = args.github_token or os.environ.get('GITHUB_TOKEN')
     
     # Get repository from values.yaml if not provided
     if args.repository == 'ghcr.io/OWNER/ai-monitoring-frontend':
