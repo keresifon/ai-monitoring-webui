@@ -72,22 +72,37 @@ jobs:
           WORKFLOW_RUN_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}")
           
-          # Try to extract head_ref first (for tags)
+          # Check the event type - if it's not a push to a tag, skip tag extraction
+          EVENT=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"event":"[^"]*"' | cut -d'"' -f4 || echo "")
+          echo "Workflow run event: $EVENT"
+          
+          # Try to extract head_ref first (for tags) - this is the actual ref that triggered the workflow
           HEAD_REF=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"head_ref":"[^"]*"' | cut -d'"' -f4 || echo "")
           
-          # If head_ref is empty, try head_branch
-          if [ -z "$HEAD_REF" ]; then
-            HEAD_REF=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"head_branch":"[^"]*"' | cut -d'"' -f4 || echo "")
+          # If head_ref is empty and event is push, try to get it from the workflow run's head_branch
+          # For tag pushes, head_branch is usually null, so we check head_ref
+          if [ -z "$HEAD_REF" ] && [ "$EVENT" = "push" ]; then
+            # For tag pushes, head_branch might be null, so check if there's a tag in the workflow run
+            # We can check the workflow run's display_title or look for tag patterns
+            HEAD_BRANCH=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"head_branch":"[^"]*"' | cut -d'"' -f4 || echo "")
+            if [ -z "$HEAD_BRANCH" ] || [ "$HEAD_BRANCH" = "null" ]; then
+              # head_branch is null for tag pushes, try to extract from display_title or path
+              DISPLAY_TITLE=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"display_title":"[^"]*"' | cut -d'"' -f4 || echo "")
+              if [[ "$DISPLAY_TITLE" =~ v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+                HEAD_REF="refs/tags/v${BASH_REMATCH[1]}"
+                echo "Extracted tag from display_title: $HEAD_REF"
+              fi
+            else
+              HEAD_REF="$HEAD_BRANCH"
+            fi
           fi
           
-          # Also check the workflow_run event directly
-          if [ -z "$HEAD_REF" ]; then
+          # If still empty, check the workflow_run event directly (might not work for tags)
+          if [ -z "$HEAD_REF" ] || [ "$HEAD_REF" = "null" ]; then
             HEAD_REF="${{ github.event.workflow_run.head_branch }}"
           fi
           
-          echo "HEAD_REF: $HEAD_REF" >> $GITHUB_OUTPUT
-          
-          # Extract tag from ref (e.g., refs/tags/v1.2.3 -> 1.2.3)
+          # Only try to extract tag if HEAD_REF looks like a tag reference
           if [[ "$HEAD_REF" =~ ^refs/tags/v(.+)$ ]]; then
             TAG="${BASH_REMATCH[1]}"
             echo "tag=$TAG" >> $GITHUB_OUTPUT
@@ -97,12 +112,13 @@ jobs:
             echo "tag=$TAG" >> $GITHUB_OUTPUT
             echo "Extracted tag: $TAG from $HEAD_REF"
           elif [[ "$HEAD_REF" =~ ^v(.+)$ ]]; then
-            # If it's just the tag name without refs/tags prefix
             TAG="${BASH_REMATCH[1]}"
             echo "tag=$TAG" >> $GITHUB_OUTPUT
             echo "Extracted tag: $TAG from $HEAD_REF"
           else
-            echo "Could not extract tag from HEAD_REF: $HEAD_REF"
+            # HEAD_REF is a branch (like "develop") or not a tag - don't extract tag
+            echo "HEAD_REF is not a tag: $HEAD_REF (likely a branch or null)"
+            echo "Tag extraction skipped - will rely on repository_dispatch or registry lookup"
           fi
 
       - name: Determine tag to use
@@ -156,8 +172,11 @@ jobs:
         run: |
           # Check if the workflow run was triggered by a tag (v*)
           # If we couldn't extract a tag, this might not be a tag-triggered run
+          # Note: repository_dispatch is the primary method, so workflow_run is just a fallback
           if [ -z "${{ steps.workflow-context.outputs.tag }}" ]; then
-            echo "Workflow run was not triggered by a tag (v*). Skipping values.yaml update."
+            echo "Workflow run was not triggered by a tag (v*) or tag extraction failed."
+            echo "This is OK - repository_dispatch should have triggered with the tag."
+            echo "Will skip workflow_run tag extraction and rely on repository_dispatch or registry lookup."
             echo "is_tag=false" >> $GITHUB_OUTPUT
           else
             echo "Workflow run was triggered by tag: ${{ steps.workflow-context.outputs.tag }}"
