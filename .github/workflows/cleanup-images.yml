@@ -29,7 +29,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      delete: packages
     
     steps:
       - name: Checkout code
