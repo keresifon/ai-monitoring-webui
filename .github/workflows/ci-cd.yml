@@ -192,6 +192,30 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract tag for values.yaml update
+        id: extract-tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # Extract version from tag (v1.2.3 -> 1.2.3)
+          TAG_NAME="${{ github.ref_name }}"
+          VERSION="${TAG_NAME#v}"  # Remove 'v' prefix if present
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted tag: $VERSION from $TAG_NAME"
+
+      - name: Trigger values.yaml update
+        if: startsWith(github.ref, 'refs/tags/v') && steps.extract-tag.outputs.tag != ''
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: image-pushed
+          client-payload: |
+            {
+              "tag": "${{ steps.extract-tag.outputs.tag }}",
+              "image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}",
+              "ref": "${{ github.ref }}"
+            }
+
   # Deploys to Kubernetes on main branch push (uses values.yaml tag)
   deploy:
     runs-on: ubuntu-latest

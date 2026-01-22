@@ -1,15 +1,13 @@
 name: Update Image Tag
 
 on:
-  # Trigger when a new release/tag is created in this repository
-  release:
-    types: [published, created]
-  # Trigger when a new tag is pushed
-  push:
-    tags:
-      - 'v*'
-      - '*.*.*'
-  # Allow triggering from another workflow (e.g., when image is built)
+  # Primary trigger: After CI/CD workflow completes (when image is built and pushed)
+  # This triggers when CI/CD runs on tags (v*) and completes successfully
+  workflow_run:
+    workflows: ["CI/CD"]
+    types:
+      - completed
+  # Trigger from docker-build job when image is pushed (preferred method - most reliable)
   repository_dispatch:
     types: [image-pushed, new-tag]
   # Allow manual triggering with optional tag input
@@ -22,6 +20,14 @@ on:
 
 jobs:
   update-image-tag:
+    # Only run if:
+    # 1. workflow_run completed successfully (will check if it was a tag in the step)
+    # 2. repository_dispatch (from docker-build job after image is pushed - PRIMARY METHOD)
+    # 3. workflow_dispatch (manual trigger)
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      github.event_name == 'repository_dispatch' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,33 +49,96 @@ jobs:
         run: |
           pip install pyyaml requests
 
+      - name: Get workflow run context
+        id: workflow-context
+        if: github.event_name == 'workflow_run'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "workflow_run_id=${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
+          echo "workflow_run_conclusion=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
+          
+          # Get workflow run details to extract the ref/tag
+          WORKFLOW_RUN_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}")
+          
+          # Try to extract head_ref first (for tags)
+          HEAD_REF=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"head_ref":"[^"]*"' | cut -d'"' -f4 || echo "")
+          
+          # If head_ref is empty, try head_branch
+          if [ -z "$HEAD_REF" ]; then
+            HEAD_REF=$(echo "$WORKFLOW_RUN_JSON" | grep -o '"head_branch":"[^"]*"' | cut -d'"' -f4 || echo "")
+          fi
+          
+          # Also check the workflow_run event directly
+          if [ -z "$HEAD_REF" ]; then
+            HEAD_REF="${{ github.event.workflow_run.head_branch }}"
+          fi
+          
+          echo "HEAD_REF: $HEAD_REF" >> $GITHUB_OUTPUT
+          
+          # Extract tag from ref (e.g., refs/tags/v1.2.3 -> 1.2.3)
+          if [[ "$HEAD_REF" =~ ^refs/tags/v(.+)$ ]]; then
+            TAG="${BASH_REMATCH[1]}"
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+            echo "Extracted tag: $TAG from $HEAD_REF"
+          elif [[ "$HEAD_REF" =~ ^refs/tags/(.+)$ ]]; then
+            TAG="${BASH_REMATCH[1]}"
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+            echo "Extracted tag: $TAG from $HEAD_REF"
+          elif [[ "$HEAD_REF" =~ ^v(.+)$ ]]; then
+            # If it's just the tag name without refs/tags prefix
+            TAG="${BASH_REMATCH[1]}"
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+            echo "Extracted tag: $TAG from $HEAD_REF"
+          else
+            echo "Could not extract tag from HEAD_REF: $HEAD_REF"
+          fi
+
       - name: Determine tag to use
         id: determine-tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MANUAL_TAG: ${{ inputs.tag }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          PUSH_TAG: ${{ github.ref_name }}
           DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          WORKFLOW_RUN_TAG: ${{ steps.workflow-context.outputs.tag }}
         run: |
-          # Priority: manual input > release tag > push tag > dispatch tag > latest from registry
+          # Priority: manual input > dispatch tag (from docker-build) > workflow_run tag > latest from registry
           if [ -n "$MANUAL_TAG" ]; then
             echo "tag=$MANUAL_TAG" >> $GITHUB_OUTPUT
             echo "source=manual" >> $GITHUB_OUTPUT
-          elif [ -n "$RELEASE_TAG" ]; then
-            echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-            echo "source=release" >> $GITHUB_OUTPUT
-          elif [ -n "$PUSH_TAG" ] && [[ "$PUSH_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$PUSH_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "tag=$PUSH_TAG" >> $GITHUB_OUTPUT
-            echo "source=push" >> $GITHUB_OUTPUT
           elif [ -n "$DISPATCH_TAG" ]; then
             echo "tag=$DISPATCH_TAG" >> $GITHUB_OUTPUT
             echo "source=dispatch" >> $GITHUB_OUTPUT
+          elif [ -n "$WORKFLOW_RUN_TAG" ]; then
+            echo "tag=$WORKFLOW_RUN_TAG" >> $GITHUB_OUTPUT
+            echo "source=workflow_run" >> $GITHUB_OUTPUT
           else
-            # Get latest from registry
+            # For workflow_run or manual trigger without tag, get latest from registry
+            # This should rarely happen as repository_dispatch should provide the tag
+            echo "Warning: No tag found in event, fetching latest from registry" >&2
             LATEST_TAG=$(python scripts/update-image-tag.py --get-latest)
-            echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-            echo "source=registry" >> $GITHUB_OUTPUT
+            if [ -n "$LATEST_TAG" ]; then
+              echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+              echo "source=registry" >> $GITHUB_OUTPUT
+            else
+              echo "Error: Could not determine tag to use" >&2
+              exit 1
+            fi
+          fi
+
+      - name: Verify workflow run was triggered by tag
+        if: github.event_name == 'workflow_run'
+        id: verify-tag
+        run: |
+          # Check if the workflow run was triggered by a tag (v*)
+          # If we couldn't extract a tag, this might not be a tag-triggered run
+          if [ -z "${{ steps.workflow-context.outputs.tag }}" ]; then
+            echo "Workflow run was not triggered by a tag (v*). Skipping values.yaml update."
+            echo "is_tag=false" >> $GITHUB_OUTPUT
+          else
+            echo "Workflow run was triggered by tag: ${{ steps.workflow-context.outputs.tag }}"
+            echo "is_tag=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Get current tag from values.yaml
@@ -81,6 +150,13 @@ jobs:
       - name: Check if update is needed
         id: check-update
         run: |
+          # Skip if workflow_run but not triggered by tag
+          if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ steps.verify-tag.outputs.is_tag }}" != "true" ]; then
+            echo "needed=false" >> $GITHUB_OUTPUT
+            echo "Skipping: Workflow run was not triggered by a tag"
+            exit 0
+          fi
+          
           if [ "${{ steps.determine-tag.outputs.tag }}" = "${{ steps.current-tag.outputs.tag }}" ]; then
             echo "needed=false" >> $GITHUB_OUTPUT
             echo "Tags are already in sync (${{ steps.current-tag.outputs.tag }})"

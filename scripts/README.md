@@ -35,17 +35,32 @@ python scripts/update-image-tag.py --update
 
 ## GitHub Actions Workflow
 
-The `.github/workflows/update-image-tag.yml` workflow automatically updates `values.yaml` when:
+The `.github/workflows/update-image-tag.yml` workflow automatically updates `values.yaml` **after** the Docker image is built and pushed to the registry. This ensures the image is available before updating the deployment configuration.
 
-1. **A new release is published** - Triggers on `release: published` or `release: created` events
-2. **A new tag is pushed** - Triggers when tags matching `v*` or semantic version patterns are pushed
-3. **Repository dispatch** - Can be triggered from another workflow (e.g., when image is built)
-4. **Manual trigger** - Can be manually triggered with an optional tag input
+### Trigger Flow
 
-The workflow will:
-- Detect the new tag from the triggering event
-- Update `charts/values.yaml` with the new tag
-- Commit and push directly to the branch (or create a PR if push fails)
+1. **Primary: Repository Dispatch** (from `ci-cd.yml` docker-build job)
+   - When a tag is pushed (e.g., `v1.2.3`), the CI/CD workflow builds and pushes the Docker image
+   - After the image is successfully pushed, it triggers this workflow via `repository_dispatch`
+   - This is the preferred method as it guarantees the image is available
+
+2. **Fallback: Workflow Run** (after CI/CD completes)
+   - Triggers after the CI/CD workflow completes successfully
+   - Extracts the tag from the workflow run context
+   - Used as a backup if repository_dispatch doesn't work
+
+3. **Release Events** - Triggers on `release: published` or `release: created` events
+
+4. **Manual Trigger** - Can be manually triggered with an optional tag input
+
+### How It Works
+
+1. You push a tag: `git tag v1.2.3 && git push origin v1.2.3`
+2. CI/CD workflow runs and builds the Docker image
+3. After the image is pushed, the docker-build job triggers the update workflow
+4. The update workflow extracts the tag (removes 'v' prefix: `1.2.3`)
+5. Updates `charts/values.yaml` with the new tag
+6. Commits and pushes directly to the branch (ready for deployment)
 
 ### Setup
 
