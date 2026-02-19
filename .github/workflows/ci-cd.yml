@@ -39,6 +39,32 @@ jobs:
         run: npm audit --audit-level=high
         continue-on-error: true
 
+      # OWASP Dependency-Check for CVE detection (matches log-processor)
+      # Fails build on CVSS >= 7. NVD_API_KEY in secrets reduces NVD rate-limiting.
+      - name: OWASP Dependency-Check (CVE scan)
+        uses: dependency-check/Dependency-Check_Action@main
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        with:
+          project: 'ai-monitoring-webui'
+          path: '.'
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            --suppression dependency-check-suppression.xml
+            --failOnError false
+
+      - name: Upload Dependency-Check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports/
+          retention-days: 30
+        continue-on-error: true
+
       - name: Lint
         run: npm run lint
         continue-on-error: true  # Continue if linting is not configured

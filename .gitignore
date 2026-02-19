@@ -25,6 +25,9 @@ logs/
 .DS_Store
 Thumbs.db
 
+# OWASP Dependency-Check output
+reports/
+
 # Coverage
 coverage/
 *.lcov

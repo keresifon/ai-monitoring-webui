@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!--
+        Suppression file for OWASP Dependency-Check (Node.js/npm)
+        Add suppressions for false positives and reviewed/accepted vulnerabilities.
+        See: https://jeremylong.github.io/DependencyCheck/general/suppression.html
+    -->
+</suppressions>
