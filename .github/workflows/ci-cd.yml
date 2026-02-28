@@ -13,10 +13,10 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Runs on develop and PRs only (NOT on main or tags)
+  # Runs on develop push and PRs targeting develop only (NOT on main, tags, or PRs to main)
   build-and-test:
     runs-on: ubuntu-latest
-    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main'"
+    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main' && (github.event_name != 'pull_request' || github.base_ref == 'develop')"
     permissions:
       contents: read
       pull-requests: write
@@ -164,7 +164,7 @@ jobs:
   # CodeQL SAST - runs in parallel with build-and-test
   sast-codeql:
     runs-on: ubuntu-latest
-    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main'"
+    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main' && (github.event_name != 'pull_request' || github.base_ref == 'develop')"
     permissions:
       security-events: write
       actions: read
