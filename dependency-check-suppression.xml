@@ -62,6 +62,16 @@
         <vulnerabilityName>CVE-2026-2391</vulnerabilityName>
     </suppress>
 
+    <!-- serialize-javascript - GHSA-5c6j-r48x-rmvq. Transitive from webpack/html-webpack-plugin. -->
+    <!-- Dev/build-time only. Re-evaluate on Angular upgrade. -->
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        serialize-javascript GHSA-5c6j-r48x-rmvq. Transitive from webpack tooling. Build-time only.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/serialize-javascript@.*$</packageUrl>
+        <vulnerabilityName>GHSA-5c6j-r48x-rmvq</vulnerabilityName>
+    </suppress>
+
     <!-- tar - Path traversal/symlink. Override to ^7.5.8 in package.json. Run npm install to apply. -->
     <suppress until="2026-06-01Z">
         <notes><![CDATA[
