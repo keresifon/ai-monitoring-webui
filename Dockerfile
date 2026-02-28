@@ -17,8 +17,8 @@ COPY . .
 # Build the application for production
 RUN npm run build -- --configuration production
 
-# Stage 2: Serve with nginx
-FROM nginx:alpine
+# Stage 2: Serve with nginx (pin to latest for security updates; libpng CVE-2026-25646 in base - see .trivyignore)
+FROM nginx:1.29-alpine
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf

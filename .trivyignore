@@ -1,0 +1,4 @@
+# libpng CVE-2026-25646 - heap buffer overflow in png_set_quantize
+# Present in nginx:alpine base image. Fix: libpng 1.6.55+ (Alpine 1.6.55-r0)
+# nginx serves static files; PNG processing risk is limited. Re-evaluate when base image includes fix.
+CVE-2026-25646 exp:2026-06-01T00:00:00Z
