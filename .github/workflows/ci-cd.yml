@@ -110,14 +110,15 @@ jobs:
 
       # OWASP Dependency-Check: use official image + pinned tag (not Dependency-Check_Action@main,
       # which always passes --noupdate and can leave NVD/CPE data stale → "Exception occurred initializing CPE Analyzer").
+      # ODC H2/Lucene under dependency-check-data is fragile when cached (partial snapshots → lock / empty DB).
+      # Re-enable caching later with a new key (e.g. v5) if NVD download time is too high.
       - name: Cache OWASP Dependency-Check data
         uses: actions/cache@v4
         with:
           path: dependency-check-data
-          # v3: do not restore older keys (v1) that may contain corrupted H2 snapshots.
-          key: odc-data-${{ runner.os }}-v3
+          key: odc-data-${{ runner.os }}-v4
           restore-keys: |
-            odc-data-${{ runner.os }}-v3-
+            odc-data-${{ runner.os }}-v4-
 
       # Fails build on CVSS >= 7. Set NVD_API_KEY repo secret or NVD updates may fail/rate-limit.
       - name: OWASP Dependency-Check (CVE scan)
@@ -151,13 +152,10 @@ jobs:
           if odc_scan; then
             exit 0
           fi
-          echo "Dependency-Check failed (e.g. H2 lock or empty DB). Purging ODC data dir and retrying once."
-          docker run --rm \
-            -v "$PWD/dependency-check-data:/odcdata" \
-            owasp/dependency-check:10.0.4 \
-            --purge \
-            --data /odcdata
-          find dependency-check-data -type f \( -name '*.lock.db' -o -name '*.trace.db' \) -delete 2>/dev/null || true
+          # Do not use --purge here: it exits non-zero when odc.mv.db is missing, which aborts under set -e before retry.
+          echo "Dependency-Check failed (e.g. H2 lock or empty DB). Wiping ODC data dir and retrying once."
+          rm -rf dependency-check-data
+          mkdir -p dependency-check-data
           odc_scan
 
       - name: Upload Dependency-Check report
