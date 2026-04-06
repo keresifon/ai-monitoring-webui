@@ -17,8 +17,15 @@ COPY . .
 # Build the application for production
 RUN npm run build -- --configuration production
 
-# Stage 2: Serve with nginx (pin to latest for security updates; libpng CVE-2026-25646 in base - see .trivyignore)
+# Stage 2: Serve with nginx. Stable Alpine lags zlib/libpng fixes; pull patched packages from edge main
+# (zlib >= 1.3.2, libpng >= 1.6.56) until the nginx base image’s release branch includes them.
 FROM nginx:1.29-alpine
+
+RUN apk update && apk upgrade --no-cache \
+    && apk add --upgrade --no-cache \
+        -X https://dl-cdn.alpinelinux.org/alpine/edge/main \
+        zlib libpng \
+    && rm -rf /var/cache/apk/*
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf

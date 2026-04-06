@@ -1,21 +1,9 @@
-# OS / base-image CVEs (zlib, libpng) from nginx:alpine. Re-evaluate after `apk upgrade` + image rebuild each release.
-# This image only serves static HTML/JS/CSS; nginx does not run zlib untgz; libpng decode paths are unused for typical SPA hosting.
-# Remove entries when `docker build` + Trivy show clean, or when Alpine packages ship fixed versions.
-#
-# GitHub Security alert mapping (Trivy / container scan):
-#   #2 libpng use-after-free -> CVE-2026-25646
-#   #3 libpng Neon palette OOB -> CVE-2026-33416, CVE-2026-33636
-#   #4 zlib untgz buffer overflow -> CVE-2026-22184
-#   #5 zlib CRC32 infinite loop -> CVE-2026-27171
+# Fallback if any finding remains after edge zlib/libpng in Dockerfile. Use `exp:YYYY-MM-DD` per Trivy docs.
+# Alerts: #2 CVE-2026-33416 (UAF), #3 CVE-2026-33636 (Neon), #4 CVE-2026-22184 (untgz), #5 CVE-2026-27171 (CRC32);
+# also CVE-2026-25646 (png_set_quantize) when present in scans.
 
-# libpng - heap buffer overflow in png_set_quantize
-CVE-2026-25646 exp:2026-06-01T00:00:00Z
-
-# libpng - use-after-free (png_set_tRNS / png_set_PLTE); Neon palette expansion (ARM)
-CVE-2026-33416 exp:2026-06-01T00:00:00Z
-CVE-2026-33636 exp:2026-06-01T00:00:00Z
-
-# zlib - untgz utility overflow (CVE-2026-22184: affects contrib/untgz, not nginx gzip static serving)
-# zlib - CRC32 combine infinite loop (CVE-2026-27171)
-CVE-2026-22184 exp:2026-06-01T00:00:00Z
-CVE-2026-27171 exp:2026-06-01T00:00:00Z
+CVE-2026-25646 exp:2026-06-01
+CVE-2026-33416 exp:2026-06-01
+CVE-2026-33636 exp:2026-06-01
+CVE-2026-22184 exp:2026-06-01
+CVE-2026-27171 exp:2026-06-01
