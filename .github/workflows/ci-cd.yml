@@ -114,32 +114,51 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dependency-check-data
-          key: odc-data-${{ runner.os }}-v1
+          # v3: do not restore older keys (v1) that may contain corrupted H2 snapshots.
+          key: odc-data-${{ runner.os }}-v3
           restore-keys: |
-            odc-data-${{ runner.os }}-
+            odc-data-${{ runner.os }}-v3-
 
-      # Fails build on CVSS >= 7. NVD_API_KEY in repo secrets reduces NVD rate-limiting.
+      # Fails build on CVSS >= 7. Set NVD_API_KEY repo secret or NVD updates may fail/rate-limit.
       - name: OWASP Dependency-Check (CVE scan)
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
+          set -euo pipefail
           mkdir -p reports dependency-check-data
-          echo "Starting OWASP Dependency-Check (stdout can be quiet for a while: NVD/CPE DB update may take 10–25+ min on cold cache)."
+          # Stale H2 lock/trace files (interrupted job, bad cache snapshot) cause "exclusive lock" / empty DB.
+          find dependency-check-data -type f \( -name '*.lock.db' -o -name '*.trace.db' \) -delete 2>/dev/null || true
+
+          odc_scan() {
+            docker run --rm \
+              -e JAVA_OPTS="-Xmx4096m" \
+              -e NVD_API_KEY \
+              -v "$PWD:/src:rw" \
+              -v "$PWD/dependency-check-data:/odcdata" \
+              owasp/dependency-check:10.0.4 \
+              --data /odcdata \
+              --scan /src \
+              --format HTML \
+              --out /src/reports \
+              --project "ai-monitoring-webui" \
+              --failOnCVSS 7 \
+              --enableRetired \
+              --suppression /src/dependency-check-suppression.xml \
+              --log /src/reports/dependency-check.log
+          }
+
+          echo "Starting OWASP Dependency-Check (NVD/CPE update can be quiet 10–25+ min on cold cache)."
+          if odc_scan; then
+            exit 0
+          fi
+          echo "Dependency-Check failed (e.g. H2 lock or empty DB). Purging ODC data dir and retrying once."
           docker run --rm \
-            -e JAVA_OPTS="-Xmx4096m" \
-            -e NVD_API_KEY \
-            -v "$PWD:/src:rw" \
             -v "$PWD/dependency-check-data:/odcdata" \
             owasp/dependency-check:10.0.4 \
-            --data /odcdata \
-            --scan /src \
-            --format HTML \
-            --out /src/reports \
-            --project "ai-monitoring-webui" \
-            --failOnCVSS 7 \
-            --enableRetired \
-            --suppression /src/dependency-check-suppression.xml \
-            --log /src/reports/dependency-check.log
+            --purge \
+            --data /odcdata
+          find dependency-check-data -type f \( -name '*.lock.db' -o -name '*.trace.db' \) -delete 2>/dev/null || true
+          odc_scan
 
       - name: Upload Dependency-Check report
         if: always()
