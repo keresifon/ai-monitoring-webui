@@ -72,6 +72,58 @@
         <vulnerabilityName>GHSA-5c6j-r48x-rmvq</vulnerabilityName>
     </suppress>
 
+    <!-- tmp - Symlink arbitrary write (GHSA-52f5-9888-hmc6). Via external-editor/inquirer. Dev-time only. -->
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        tmp symlink vulnerability. Transitive from inquirer/external-editor. Dev/build-time only.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/tmp@.*$</packageUrl>
+        <vulnerabilityName>GHSA-52f5-9888-hmc6</vulnerabilityName>
+        <vulnerabilityName>CVE-2025-54798</vulnerabilityName>
+    </suppress>
+
+    <!-- webpack-dev-server - Source code theft. Dev-only, not in production image. -->
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        webpack-dev-server GHSA-9jgg-88mc-972h, GHSA-4v9v-hfq4-rm2v. Dev server only, not in production.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/webpack-dev-server@.*$</packageUrl>
+        <vulnerabilityName>GHSA-9jgg-88mc-972h</vulnerabilityName>
+        <vulnerabilityName>GHSA-4v9v-hfq4-rm2v</vulnerabilityName>
+    </suppress>
+
+    <!-- tuf-js, @sigstore/tuf - Transitive from @angular-devkit. Dev/build-time. -->
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        tuf-js. Transitive from @sigstore/tuf. Build-time only. Re-evaluate on Angular upgrade.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/tuf-js@.*$</packageUrl>
+    </suppress>
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        @sigstore/tuf. Transitive from Angular tooling. Build-time only.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/%40sigstore%2Ftuf@.*$</packageUrl>
+    </suppress>
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        make-fetch-happen. Transitive from tuf-js. Build-time only.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/make-fetch-happen@.*$</packageUrl>
+    </suppress>
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        external-editor. Transitive via inquirer. Dev-time only.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/external-editor@.*$</packageUrl>
+    </suppress>
+    <suppress until="2026-06-01Z">
+        <notes><![CDATA[
+        inquirer. Transitive. Dev-time only.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:npm/inquirer@.*$</packageUrl>
+    </suppress>
+
     <!-- tar - Path traversal/symlink. Override to ^7.5.8 in package.json. Run npm install to apply. -->
     <suppress until="2026-06-01Z">
         <notes><![CDATA[
