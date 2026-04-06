@@ -109,6 +109,7 @@ jobs:
         continue-on-error: true
 
       # OWASP Dependency-Check: official image + pinned tag (not Dependency-Check_Action@main).
+      # Use 12.x+: NVD API JSON can include CVSS v4 values (e.g. SAFETY) that 10.0.x cannot parse → UpdateException.
       # Do NOT bind-mount --data from the workspace: H2/Lucene on GHA overlay often hits "exclusive lock" / empty DB.
       # Keep ODC data under /tmp inside the container only (ephemeral; NVD downloads each run, ~10–25+ min).
       # Fails build on CVSS >= 7. Set repo secret NVD_API_KEY (exact name). Fork PRs get an empty secret unless you use pull_request_target.
@@ -125,7 +126,7 @@ jobs:
               -e JAVA_OPTS="-Xmx4096m" \
               -e "NVD_API_KEY=${NVD_API_KEY}" \
               -v "$PWD:/src:rw" \
-              owasp/dependency-check:10.0.4 \
+              owasp/dependency-check:12.2.0 \
               --data /tmp/odc-data \
               --nvdApiKey "${NVD_API_KEY}" \
               --scan /src \
