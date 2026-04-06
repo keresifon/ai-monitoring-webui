@@ -112,6 +112,8 @@ jobs:
       # 12.x+: NVD CVSS v4 JSON (e.g. SAFETY) breaks older clients. ODC data in /tmp inside container (avoids H2 lock on overlay).
       # Scan package.json + package-lock.json only (full repo scan often hits exit 12 during report generation).
       # CVSS >= 7 fails the job. Set NVD_API_KEY repo secret. Fork PRs do not receive secrets by default.
+      # -XX:ActiveProcessorCount=1: NVD API path uses a DB writer pool sized by availableProcessors(); parallel
+      #   H2 updates on cpeEntry can deadlock (e.g. CVE-2012-6496 / 40001). Single writer avoids that.
       - name: OWASP Dependency-Check (CVE scan)
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
@@ -122,7 +124,7 @@ jobs:
 
 
           docker run --rm \
-            -e JAVA_OPTS="-Xmx8192m" \
+            -e JAVA_OPTS="-Xmx8192m -XX:ActiveProcessorCount=1" \
             -e "NVD_API_KEY=${NVD_API_KEY}" \
             -v "$PWD/package.json:/src/package.json:ro" \
             -v "$PWD/package-lock.json:/src/package-lock.json:ro" \
