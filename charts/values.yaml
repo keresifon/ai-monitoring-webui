@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/kere-sifon/ai-monitoring-webui
   pullPolicy: IfNotPresent
-  tag: "1.0.6"
+  tag: "1.0.7"
 
 # For private GHCR images: create a docker-registry secret and set:
 # imagePullSecrets: [{ name: ghcr-pull-secret }]
@@ -20,6 +20,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 80
+  targetPort: 8080
 
 ingress:
   enabled: true
@@ -53,14 +54,14 @@ autoscaling:
 livenessProbe:
   httpGet:
     path: /health
-    port: http
+    port: 8080
   initialDelaySeconds: 10
   periodSeconds: 10
 
 readinessProbe:
   httpGet:
     path: /health
-    port: http
+    port: 8080
   initialDelaySeconds: 5
   periodSeconds: 5
 

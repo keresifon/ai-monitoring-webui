@@ -19,6 +19,7 @@ RUN npm run build -- --configuration production
 
 # Stage 2: Serve with nginx. Stable Alpine lags zlib/libpng fixes; pull patched packages from edge main
 # (zlib >= 1.3.2, libpng >= 1.6.56) until the nginx base image’s release branch includes them.
+
 FROM nginx:1.29-alpine
 
 RUN apk update && apk upgrade --no-cache \
@@ -37,19 +38,26 @@ RUN apk update && apk upgrade --no-cache \
     && chgrp -R 0 /var/cache/nginx /var/run/nginx /tmp/nginx \
     && chmod -R g=u /var/cache/nginx /var/run/nginx /tmp/nginx
 
-# Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built application from builder stage
+# Make nginx.conf readable/writable by group 0 for OpenShift arbitrary UID
+RUN chgrp 0 /etc/nginx/conf.d/default.conf \
+    && chmod g=u /etc/nginx/conf.d/default.conf
+
 COPY --from=builder /app/dist/ai-monitoring-ui/browser /usr/share/nginx/html
 
-# COPY leaves root-owned files; nginx worker must read them (incl. OpenShift random UID + group 0)
 RUN chown -R nginx:nginx /usr/share/nginx/html \
     && chgrp -R 0 /usr/share/nginx/html \
     && chmod -R g=u /usr/share/nginx/html
 
-# Expose port 80
-EXPOSE 80
+# Also need nginx master process writable paths for pid file
+RUN touch /var/run/nginx.pid \
+    && chown nginx:nginx /var/run/nginx.pid \
+    && chgrp 0 /var/run/nginx.pid \
+    && chmod g=u /var/run/nginx.pid
 
-# Start nginx
+EXPOSE 8080
+
+USER nginx
+
 CMD ["nginx", "-g", "daemon off;"]
