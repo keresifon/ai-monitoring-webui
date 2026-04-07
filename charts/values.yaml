@@ -20,6 +20,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 80
+  targetPort: 8080
 
 ingress:
   enabled: true
@@ -53,14 +54,14 @@ autoscaling:
 livenessProbe:
   httpGet:
     path: /health
-    port: http
+    port: 8080
   initialDelaySeconds: 10
   periodSeconds: 10
 
 readinessProbe:
   httpGet:
     path: /health
-    port: http
+    port: 8080
   initialDelaySeconds: 5
   periodSeconds: 5
 
