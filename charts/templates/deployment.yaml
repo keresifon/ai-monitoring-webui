@@ -15,12 +15,18 @@ spec:
     metadata:
       labels:
         {{- include "frontend.selectorLabels" . | nindent 8 }}
+        app: {{ include "frontend.name" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "frontend.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101        # nginx UID in nginx:alpine image
+        runAsGroup: 0         # group 0 — matches chgrp -R 0 in Dockerfile
+        fsGroup: 0
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -29,6 +35,11 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # nginx writes to /tmp/nginx/* and /var/run/nginx.pid
+            capabilities:
+              drop: ["ALL"]
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
