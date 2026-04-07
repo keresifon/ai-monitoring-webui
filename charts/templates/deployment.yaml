@@ -26,9 +26,15 @@ spec:
         seccompProfile:
           type: RuntimeDefault
         runAsNonRoot: true
+        {{- if .Values.openshift.enabled }}
+        # OpenShift assigns UID from the namespace SCC range; restricted-v2/v3 forbid fsGroup 0 and fixed UID 101.
+        # Dockerfile uses chgrp 0 + chmod g=u so nginx runs with arbitrary UID + root group.
+        hostUsers: false
+        {{- else }}
         runAsUser: 101        # nginx UID in nginx:alpine image
         runAsGroup: 0         # group 0 — matches chgrp -R 0 in Dockerfile
         fsGroup: 0
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

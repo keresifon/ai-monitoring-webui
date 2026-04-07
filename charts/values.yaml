@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/kere-sifon/ai-monitoring-webui
   pullPolicy: IfNotPresent
-  tag: "1.0.9"
+  tag: "1.0.8"
 
 # For private GHCR images: create a docker-registry secret and set:
 # imagePullSecrets: [{ name: ghcr-pull-secret }]
@@ -65,6 +65,7 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
 
+# Set true on OpenShift/OKD so the pod uses SCC-friendly securityContext (no fixed UID/fsGroup 0).
 openshift:
   enabled: false
   route:
