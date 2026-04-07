@@ -1,110 +1,130 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles — Bootstrap CSS loads before Material (see angular.json). */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
 
-// Global Material form field input text styling for minimalist theme
-::ng-deep {
-  // Direct input element targeting - highest priority
-  input.mat-mdc-input-element,
-  input[matInput],
-  textarea.mat-mdc-input-element,
-  textarea[matInput] {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    caret-color: #000000 !important;
+body {
+  margin: 0;
+  font-family: var(--bs-body-font-family, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  font-size: var(--bs-body-font-size, 1rem);
+  line-height: var(--bs-body-line-height, 1.5);
+  color: var(--bs-body-color, #212529);
+  background-color: var(--bs-body-bg, #fff);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Keep Material typography scale but align typeface with Bootstrap stack */
+body.mat-typography {
+  font-family: var(--bs-body-font-family, Roboto, "Helvetica Neue", sans-serif);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Bootstrap-like Material outline fields (high contrast borders + fill)      */
+/* -------------------------------------------------------------------------- */
+
+.mat-mdc-form-field-appearance-outline {
+  .mat-mdc-text-field-wrapper {
+    background-color: var(--bs-body-bg, #fff) !important;
+    border-radius: var(--bs-border-radius, 0.375rem);
   }
 
-  // Material MDC form field structure
-  .mat-mdc-form-field {
-    // Input control wrapper
-    .mat-mdc-text-field-wrapper {
-      .mat-mdc-form-field-flex {
-        .mat-mdc-form-field-input-control {
-          input,
-          textarea {
-            color: #000000 !important;
-            -webkit-text-fill-color: #000000 !important;
-            caret-color: #000000 !important;
-          }
-
-          // Direct child input
-          > input,
-          > textarea {
-            color: #000000 !important;
-            -webkit-text-fill-color: #000000 !important;
-            caret-color: #000000 !important;
-          }
-        }
-      }
-    }
-
-    // Select value text
-    .mat-mdc-select-value {
-      color: #000000 !important;
+  .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--bs-border-color, #dee2e6) !important;
     }
   }
 
-  // Material input base styling
-  .mat-mdc-input-element {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    caret-color: #000000 !important;
+  &:hover:not(.mat-form-field-disabled) .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--bs-secondary-color, #6c757d) !important;
+    }
   }
 
-  // Native input elements - direct targeting
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="url"],
+  &.mat-focused:not(.mat-form-field-invalid) .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--bs-primary, #0d6efd) !important;
+      border-width: 1px !important;
+    }
+  }
+
+  &.mat-form-field-invalid.mat-focused .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--bs-danger, #dc3545) !important;
+    }
+  }
+
+  .mat-mdc-floating-label,
+  .mdc-floating-label {
+    color: var(--bs-secondary-color, #6c757d) !important;
+  }
+
+  &.mat-focused:not(.mat-form-field-invalid) .mat-mdc-floating-label,
+  &.mat-focused:not(.mat-form-field-invalid) .mdc-floating-label--float-above {
+    color: var(--bs-primary, #0d6efd) !important;
+  }
+}
+
+/* Input / textarea text — use Bootstrap body color (not faint theme grey) */
+input.mat-mdc-input-element,
+input[matInput],
+textarea.mat-mdc-input-element,
+textarea[matInput],
+.mdc-text-field__input {
+  color: var(--bs-body-color, #212529) !important;
+  -webkit-text-fill-color: var(--bs-body-color, #212529) !important;
+  caret-color: var(--bs-primary, #0d6efd) !important;
+}
+
+.mat-mdc-select-value,
+.mat-mdc-select-min-line {
+  color: var(--bs-body-color, #212529) !important;
+}
+
+.mat-mdc-autocomplete-panel .mat-mdc-option {
+  color: var(--bs-body-color, #212529);
+}
+
+/* Placeholders */
+input::placeholder,
+textarea::placeholder,
+.mdc-text-field__input::placeholder {
+  color: var(--bs-secondary-color, #6c757d) !important;
+  opacity: 1;
+}
+
+/* Autofill: keep readable text on light field */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--bs-body-color, #212529) !important;
+  box-shadow: 0 0 0 1000px var(--bs-body-bg, #fff) inset !important;
+  transition: background-color 99999s ease-out;
+}
+
+/* Nested Material structure (global stylesheet — no encapsulation) */
+.mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-form-field-input-control {
+  input,
   textarea {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    caret-color: #000000 !important;
+    color: var(--bs-body-color, #212529) !important;
+    -webkit-text-fill-color: var(--bs-body-color, #212529) !important;
   }
+}
 
-  // Autocomplete input
-  .mat-mdc-autocomplete-trigger {
-    input {
-      color: #000000 !important;
-      -webkit-text-fill-color: #000000 !important;
-      caret-color: #000000 !important;
-    }
-  }
-
-  // Override autofill styles
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  input:-webkit-autofill:active {
-    -webkit-text-fill-color: #000000 !important;
-    -webkit-box-shadow: 0 0 0 30px white inset !important;
-    box-shadow: 0 0 0 30px white inset !important;
-  }
-
-  // MDC text field input - direct targeting
-  .mdc-text-field__input {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    caret-color: #000000 !important;
-  }
-
-  // Material form field input - all variations
-  mat-form-field {
-    .mdc-text-field__input {
-      color: #000000 !important;
-      -webkit-text-fill-color: #000000 !important;
-      caret-color: #000000 !important;
-    }
-
-    input.mdc-text-field__input,
-    textarea.mdc-text-field__input {
-      color: #000000 !important;
-      -webkit-text-fill-color: #000000 !important;
-      caret-color: #000000 !important;
-    }
-  }
+/* Primary actions: optional Bootstrap-style emphasis for mat-flat-button primary usage */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-flat-button.mat-primary {
+  --mdc-filled-button-container-color: var(--bs-primary, #0d6efd);
+  --mdc-filled-button-label-text-color: #fff;
 }
