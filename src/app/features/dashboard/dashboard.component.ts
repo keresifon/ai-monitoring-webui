@@ -480,9 +480,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   getStatusColor(status: string): string {
     const colorMap: { [key: string]: string } = {
-      'ACTIVE': 'warn',
+      'OPEN': 'warn',
       'ACKNOWLEDGED': 'accent',
-      'RESOLVED': 'primary'
+      'RESOLVED': 'primary',
+      'FALSE_POSITIVE': 'primary'
     };
     return colorMap[status.toUpperCase()] || 'primary';
   }

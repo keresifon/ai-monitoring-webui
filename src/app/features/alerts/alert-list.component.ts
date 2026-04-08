@@ -65,8 +65,25 @@ export class AlertListComponent implements OnInit, OnDestroy {
   pageIndex = 0;
   totalItems = 0;
   
-  severityOptions = Object.values(AlertSeverity);
-  statusOptions = Object.values(AlertStatus);
+  /** Explicit lists — avoids empty mat-option panels with some builds using {@code Object.values(enum)}. */
+  readonly severityOptions: AlertSeverity[] = [
+    AlertSeverity.CRITICAL,
+    AlertSeverity.HIGH,
+    AlertSeverity.MEDIUM,
+    AlertSeverity.LOW,
+    AlertSeverity.INFO
+  ];
+
+  /** Matches alert-service {@code AlertStatus} (OPEN, not ACTIVE). */
+  readonly statusOptions: AlertStatus[] = [
+    AlertStatus.OPEN,
+    AlertStatus.ACKNOWLEDGED,
+    AlertStatus.RESOLVED,
+    AlertStatus.FALSE_POSITIVE
+  ];
+
+  readonly compareSeverity = (a: AlertSeverity, b: AlertSeverity) => a === b;
+  readonly compareStatus = (a: AlertStatus, b: AlertStatus) => a === b;
   
   private readonly REFRESH_INTERVAL = 30000;
   private readonly destroy$ = new Subject<void>();
@@ -210,11 +227,12 @@ export class AlertListComponent implements OnInit, OnDestroy {
 
   getStatusColor(status: AlertStatus): string {
     const colors: Record<AlertStatus, string> = {
-      [AlertStatus.ACTIVE]: 'warn',
+      [AlertStatus.OPEN]: 'warn',
       [AlertStatus.ACKNOWLEDGED]: 'accent',
-      [AlertStatus.RESOLVED]: 'primary'
+      [AlertStatus.RESOLVED]: 'primary',
+      [AlertStatus.FALSE_POSITIVE]: 'primary'
     };
-    return colors[status];
+    return colors[status] ?? 'primary';
   }
 
   formatDate(date: Date): string {

@@ -26,10 +26,12 @@ export enum AlertSeverity {
   INFO = 'INFO'
 }
 
+/** Matches {@code com.ibm.aimonitoring.alert.model.AlertStatus} (alert-service). */
 export enum AlertStatus {
-  ACTIVE = 'ACTIVE',
+  OPEN = 'OPEN',
   ACKNOWLEDGED = 'ACKNOWLEDGED',
-  RESOLVED = 'RESOLVED'
+  RESOLVED = 'RESOLVED',
+  FALSE_POSITIVE = 'FALSE_POSITIVE'
 }
 
 export interface AlertRule {

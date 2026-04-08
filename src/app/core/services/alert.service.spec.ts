@@ -13,11 +13,22 @@ describe('AlertService', () => {
     ruleId: 'rule1',
     ruleName: 'Test Rule',
     severity: AlertSeverity.HIGH,
-    status: AlertStatus.ACTIVE,
+    status: AlertStatus.OPEN,
     title: 'Test Alert',
     message: 'Test message',
     triggeredAt: new Date(),
     metadata: {}
+  };
+
+  const mockAlertDtoJson = {
+    id: 1,
+    alertRuleId: 1,
+    alertRuleName: 'Test Rule',
+    severity: 'HIGH',
+    status: 'OPEN',
+    title: 'Test Alert',
+    description: 'Test message',
+    createdAt: '2020-01-01T00:00:00.000Z'
   };
 
   beforeEach(() => {
@@ -42,46 +53,47 @@ describe('AlertService', () => {
 
   describe('getAlerts', () => {
     it('should fetch all alerts', waitForAsync(() => {
-      const mockAlerts: Alert[] = [mockAlert];
-
       const subscription = service.getAlerts().subscribe({
         next: (alerts) => {
-          expect(alerts).toEqual(mockAlerts);
+          expect(alerts.length).toBe(1);
+          expect(alerts[0].id).toBe('1');
+          expect(alerts[0].severity).toBe(AlertSeverity.HIGH);
+          expect(alerts[0].status).toBe(AlertStatus.OPEN);
+          expect(alerts[0].message).toBe('Test message');
         },
         error: () => fail('should not have failed')
       });
 
-      // The request should be made immediately when subscribe is called
       const req = httpMock.expectOne(`${environment.apiUrl}/alerts`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockAlerts);
-      
+      req.flush({ content: [mockAlertDtoJson], totalElements: 1 });
+
       subscription.unsubscribe();
     }));
 
     it('should fetch alerts with filters', () => {
       const filter: AlertFilter = {
         severity: [AlertSeverity.HIGH, AlertSeverity.CRITICAL],
-        status: [AlertStatus.ACTIVE],
+        status: [AlertStatus.OPEN],
         search: 'test'
       };
 
       const subscription = service.getAlerts(filter).subscribe({
         next: (alerts) => {
-          expect(alerts).toEqual([mockAlert]);
+          expect(alerts.length).toBe(1);
+          expect(alerts[0].id).toBe('1');
         },
         error: () => fail('should not have failed')
       });
 
-      // Use function matcher to match URL with query params
       const req = httpMock.expectOne((request) => {
         return request.url === `${environment.apiUrl}/alerts` &&
                request.method === 'GET' &&
                request.params.get('severity') === 'HIGH,CRITICAL' &&
-               request.params.get('status') === 'ACTIVE' &&
+               request.params.get('status') === 'OPEN' &&
                request.params.get('search') === 'test';
       });
-      req.flush([mockAlert]);
+      req.flush({ content: [mockAlertDtoJson] });
       
       subscription.unsubscribe();
     });
@@ -113,41 +125,34 @@ describe('AlertService', () => {
     it('should fetch alert by id', waitForAsync(() => {
       service.getAlertById('1').subscribe({
         next: (alert) => {
-          expect(alert).toEqual(mockAlert);
+          expect(alert.id).toBe('1');
+          expect(alert.status).toBe(AlertStatus.OPEN);
+          expect(alert.message).toBe('Test message');
         },
         error: () => fail('should not have failed')
       });
 
       const req = httpMock.expectOne(`${environment.apiUrl}/alerts/1`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockAlert);
+      req.flush(mockAlertDtoJson);
     }));
   });
 
   describe('getStatistics', () => {
     it('should fetch alert statistics', () => {
-      const mockStats = {
-        totalAlerts: 10,
-        activeAlerts: 5,
-        acknowledgedAlerts: 3,
-        resolvedAlerts: 2,
-        criticalAlerts: 2,
-        highAlerts: 3,
-        mediumAlerts: 3,
-        lowAlerts: 2
-      };
-
       const subscription = service.getStatistics().subscribe({
         next: (stats) => {
-          expect(stats).toEqual(mockStats);
+          expect(stats.totalAlerts).toBe(10);
+          expect(stats.activeAlerts).toBe(5);
+          expect(stats.acknowledgedAlerts).toBe(3);
+          expect(stats.resolvedAlerts).toBe(2);
         },
         error: () => fail('should not have failed')
       });
 
-      // The request should be made immediately when subscribe is called
       const req = httpMock.expectOne(`${environment.apiUrl}/alerts/statistics`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockStats);
+      req.flush({ total: 10, open: 5, acknowledged: 3, resolved: 2, falsePositive: 0 });
       
       subscription.unsubscribe();
     });
@@ -155,8 +160,6 @@ describe('AlertService', () => {
 
   describe('acknowledgeAlert', () => {
     it('should acknowledge an alert', () => {
-      const acknowledgedAlert = { ...mockAlert, status: AlertStatus.ACKNOWLEDGED, acknowledgedAt: new Date(), acknowledgedBy: 'user1' };
-
       const subscription = service.acknowledgeAlert('1', { acknowledgedBy: 'user1', notes: 'Acknowledged' }).subscribe({
         next: (alert) => {
           expect(alert.status).toBe(AlertStatus.ACKNOWLEDGED);
@@ -167,7 +170,17 @@ describe('AlertService', () => {
       // The request should be made immediately when subscribe is called
       const req = httpMock.expectOne(`${environment.apiUrl}/alerts/1/acknowledge`);
       expect(req.request.method).toBe('POST');
-      req.flush(acknowledgedAlert);
+      req.flush({
+        id: 1,
+        alertRuleId: 1,
+        alertRuleName: 'Test Rule',
+        severity: 'HIGH',
+        status: 'ACKNOWLEDGED',
+        title: 'Test Alert',
+        description: 'Test message',
+        createdAt: '2020-01-01T00:00:00.000Z',
+        acknowledgedBy: 'user1'
+      });
       
       subscription.unsubscribe();
     });
@@ -175,8 +188,6 @@ describe('AlertService', () => {
 
   describe('resolveAlert', () => {
     it('should resolve an alert', () => {
-      const resolvedAlert = { ...mockAlert, status: AlertStatus.RESOLVED, resolvedAt: new Date(), resolvedBy: 'user1' };
-
       const subscription = service.resolveAlert('1', { resolvedBy: 'user1', resolution: 'Resolved' }).subscribe({
         next: (alert) => {
           expect(alert.status).toBe(AlertStatus.RESOLVED);
@@ -187,7 +198,17 @@ describe('AlertService', () => {
       // The request should be made immediately when subscribe is called
       const req = httpMock.expectOne(`${environment.apiUrl}/alerts/1/resolve`);
       expect(req.request.method).toBe('POST');
-      req.flush(resolvedAlert);
+      req.flush({
+        id: 1,
+        alertRuleId: 1,
+        alertRuleName: 'Test Rule',
+        severity: 'HIGH',
+        status: 'RESOLVED',
+        title: 'Test Alert',
+        description: 'Test message',
+        createdAt: '2020-01-01T00:00:00.000Z',
+        resolvedBy: 'user1'
+      });
       
       subscription.unsubscribe();
     });
