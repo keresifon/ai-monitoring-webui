@@ -91,11 +91,19 @@ export class AlertService {
    * Alert-service returns a Spring {@code Page<AlertDTO>}; unwrap {@code content} and map fields to the UI model.
    */
   private normalizeAlertsResponse(body: Alert[] | SpringPage<AlertDtoJson>): Alert[] {
-    const rows = Array.isArray(body) ? body : (body.content ?? []);
-    return rows.map((dto) => this.mapAlertDto(dto));
+    const rows: Array<AlertDtoJson | Alert> = Array.isArray(body) ? body : (body.content ?? []);
+    return rows.map((row) => this.mapAlertDto(row));
   }
 
-  private mapAlertDto(dto: AlertDtoJson): Alert {
+  /** Backend DTO uses numeric {@code id}; UI {@link Alert} uses string {@code id}. */
+  private isAlertDtoJson(dto: AlertDtoJson | Alert): dto is AlertDtoJson {
+    return typeof dto.id !== 'string';
+  }
+
+  private mapAlertDto(dto: AlertDtoJson | Alert): Alert {
+    if (!this.isAlertDtoJson(dto)) {
+      return dto;
+    }
     const anyDto = dto as AlertDtoJson & { message?: string };
     return {
       id: String(dto.id),
