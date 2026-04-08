@@ -65,7 +65,7 @@
         <!-- Severity Filter -->
         <mat-form-field appearance="outline">
           <mat-label>Severity</mat-label>
-          <mat-select [(ngModel)]="selectedSeverities" multiple (selectionChange)="onFilterChange()">
+          <mat-select [(ngModel)]="selectedSeverities" multiple [compareWith]="compareSeverity" (selectionChange)="onFilterChange()">
             <mat-option *ngFor="let severity of severityOptions" [value]="severity">
               {{ severity }}
             </mat-option>
@@ -75,7 +75,7 @@
         <!-- Status Filter -->
         <mat-form-field appearance="outline">
           <mat-label>Status</mat-label>
-          <mat-select [(ngModel)]="selectedStatuses" multiple (selectionChange)="onFilterChange()">
+          <mat-select [(ngModel)]="selectedStatuses" multiple [compareWith]="compareStatus" (selectionChange)="onFilterChange()">
             <mat-option *ngFor="let status of statusOptions" [value]="status">
               {{ status }}
             </mat-option>
@@ -151,7 +151,7 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="acknowledgeAlert(alert)" *ngIf="alert.status === 'ACTIVE'">
+            <button mat-menu-item (click)="acknowledgeAlert(alert)" *ngIf="alert.status === 'OPEN'">
               <mat-icon>check_circle</mat-icon>
               <span>Acknowledge</span>
             </button>
